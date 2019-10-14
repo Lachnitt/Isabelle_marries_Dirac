@@ -12,6 +12,7 @@ theory Grover
 imports                           
   More_Tensor
   Binary_Nat
+  Basics
   Deutsch_Jozsa (*Just for now so that I don't have to copy everything*)
 begin
 
@@ -294,11 +295,23 @@ next
   finally show "2^(Suc n)-2^((Suc n)-1) = (2::complex)^((Suc n)-1)" by simp
 qed
 
+declare[[show_types]]
+lemma b1 [simp]:
+  assumes "n \<ge> 1"
+  shows "((2^(n-1)-(1::complex))/2^(n-1)) = (2^n-2)/(2::complex)^n" 
+  by (smt One_nat_def Suc_diff_le assms diff_Suc_Suc diff_divide_distrib diff_zero div_self divide_divide_eq_left power.simps(2) power_not_zero zero_neq_numeral)
+
+
+lemma h3[simp]: 
+  assumes "n \<ge> 1"
+  shows "(2::complex)/2^n = 1/2^(n-1)"
+  sorry
+
 lemma (in grover) app_diffusion_op:
   fixes \<alpha> \<beta>::complex 
   defines "v \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then -\<alpha> else \<beta>))"
-    and "w \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then ((2^(n-1)-1)/2^(n-1))*\<alpha> + (2^n-1)/(2^(n-1))*\<beta>
-                                             else 1/2^(n-1)*-\<alpha> + (-1+2^(n-1))/2^(n-1)*\<beta> ))"
+    and "w \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then ((2^n-2)/2^n)*\<alpha> + (2^n-1)/(2^(n-1))*\<beta>
+                                             else 2/2^n*-\<alpha> + (2^n-2)/2^n*\<beta> ))"
   shows "D * v = w"
 proof
   fix i j::nat
@@ -320,10 +333,11 @@ proof
       by (simp add: of_nat_diff)
     moreover have  "((1-2^(n-1))/2^(n-1)) * (-\<alpha>) = ((2^(n-1)-1)/2^(n-1))*\<alpha>" 
       by (metis divide_minus_left minus_diff_eq minus_mult_minus)
-    ultimately have "(D * v) $$ (i,j) = ((2^(n-1)-1)/2^(n-1))*\<alpha> + (2^n-1)/(2^(n-1))*\<beta>"
+    ultimately have f0: "(D * v) $$ (i,j) = ((2^(n-1)-1)/2^(n-1))*\<alpha> + (2^n-1)/(2^(n-1))*\<beta>"
       using assms diffusion_operator_def a2 f0 f1
       by (simp add: of_nat_diff)
-    then show  "(D * v) $$ (i,j) = w $$ (i,j)" using assms a2 a0 a1 f1 by auto
+    then have "(D * v) $$ (i,j) = ((2^n-2)/2^n)*\<alpha> + (2^n-1)/(2^(n-1))*\<beta>" using dim b1 by (simp add: f0)
+    then show "(D * v) $$ (i,j) = w $$ (i,j)" using assms a2 a0 a1 f1 by auto
   next
     assume a2: "i\<noteq>x "
     have "(\<Sum> k \<in> ({0 ..< 2^n}-{i}). (Matrix.row D i) $ k * (Matrix.col v j) $ k) =
@@ -333,39 +347,40 @@ proof
       by (smt Diff_insert2 add.commute atLeast0LessThan finite_Diff finite_atLeastLessThan 
           insertE insert_Diff_single insert_absorb lessThan_iff mem_Collect_eq searched_dom sum.insert_remove)
     moreover have "(\<Sum> k \<in> ({0 ..< 2^n}-{i,x}). (Matrix.row D i) $ k * (Matrix.col v j) $ k) = (2^n - 2) /(2^(n-1)) * \<beta>" 
-    proof-{
-        have "i < 2^n \<and> x < 2^n \<and> i \<noteq> x "
-          using a2 f0 grover.searched_dom grover_axioms by fastforce
-        then have "(\<Sum> k \<in> ({0 ..< 2^n}-{i,x}). 1/(2^(n-1)) * \<beta>) = (2^n - 2) * (1/2^(n-1) * \<beta>)"
-          using sum_without_x_and_i[of i "2^n" x "1/(2^(n-1)) * \<beta>"] assms by auto
-        moreover have "(\<Sum> k \<in> ({0 ..< 2^n}-{i,x}). (Matrix.row D i) $ k * (Matrix.col v j) $ k) =
-              (\<Sum> k \<in> ({0 ..< 2^n}-{i,x}). 1/(2^(n-1)) * \<beta>)" 
-          using diffusion_operator_def a2 f0 assms by auto
-        ultimately show  "(\<Sum> k \<in> ({0 ..< 2^n}-{i,x}). (Matrix.row D i) $ k * (Matrix.col v j) $ k) 
+    proof-
+      have "i < 2^n \<and> x < 2^n \<and> i \<noteq> x "
+        using a2 f0 grover.searched_dom grover_axioms by fastforce
+      then have "(\<Sum> k \<in> ({0 ..< 2^n}-{i,x}). 1/(2^(n-1)) * \<beta>) = (2^n - 2) * (1/2^(n-1) * \<beta>)"
+        using sum_without_x_and_i[of i "2^n" x "1/(2^(n-1)) * \<beta>"] assms by auto
+      moreover have "(\<Sum> k \<in> ({0 ..< 2^n}-{i,x}). (Matrix.row D i) $ k * (Matrix.col v j) $ k) =
+                     (\<Sum> k \<in> ({0 ..< 2^n}-{i,x}). 1/(2^(n-1)) * \<beta>)" 
+        using diffusion_operator_def a2 f0 assms by auto
+      ultimately show  "(\<Sum> k \<in> ({0 ..< 2^n}-{i,x}). (Matrix.row D i) $ k * (Matrix.col v j) $ k) 
                         = (2^n - 2) /(2 ^ (n-1)) * \<beta>" 
-          by simp
-    }qed
+        by simp
+    qed
     moreover have "((Matrix.row D i) $ x * (Matrix.col v j) $ x) = 1/2^(n-1)*-\<alpha>" 
       using diffusion_operator_def a2 v_def f0 searched_dom by auto
     moreover have "(Matrix.row D i) $ i * (Matrix.col v j) $ i = ((1-2^(n-1))/2^(n-1))*\<beta>" 
       using diffusion_operator_def a2 f0 v_def searched_dom by auto
-    ultimately have  "(D * v) $$ (i,j) = (2^n - 2) /(2 ^ (n-1)) * \<beta> + 1/2^(n-1)*-\<alpha> +((1-2^(n-1))/2^(n-1))*\<beta>" 
+    ultimately have  "(D * v) $$ (i,j) = (2^n-2)/(2^(n-1)) * \<beta> + 1/2^(n-1)*-\<alpha> +((1-2^(n-1))/2^(n-1))*\<beta>" 
       using f1 by auto 
-    moreover have "(2^n - 2) /(2 ^ (n-1)) * \<beta> + ((1-2^(n-1))/2^(n-1))*\<beta> = (2^(n-1)-1)/2^(n-1)*\<beta>" 
+    moreover have "(2^n-2)/(2^(n-1)) * \<beta> + ((1-2^(n-1))/2^(n-1))*\<beta> = (2^n-2)/2^n*\<beta>" 
     proof-
-      have "(2^n - 2) /(2 ^ (n-1))+((1-2^(n-1))/2^(n-1)) = ((2^n - (2::complex)) + (1 - 2^(n-1))) * 1/(2^(n-1))"
+      have "(2^n - 2) /(2^(n-1))+((1-2^(n-1))/2^(n-1)) = ((2^n - (2::complex)) + (1 - 2^(n-1))) * 1/(2^(n-1))"
         using comm_semiring_class.distrib[of "(2^n - (2::complex))" "(1-2^(n-1))" "1/(2^(n-1))"] by auto
-      also have "... = (2^n -2^(n-1)- (2::complex)+1) * 1/(2^(n-1))" 
+      also have "... = (2^n-2^(n-1)-(2::complex)+1) * 1/(2^(n-1))" 
         by (simp add: dim)
-      also have "... =  (2^(n-1)- (1::complex)) * 1/(2^(n-1))" 
+      also have "... = (2^(n-1)-(1::complex)) * 1/(2^(n-1))" 
         using dim pow_2_n_half by auto
-      moreover have "(2^n - (2::complex)) /(2^(n-1)) * \<beta> + ((1 - 2^(n-1))/2^(n-1)) * \<beta> 
-                   = ((2^n - 2) /(2^(n-1)) + ((1 - 2^(n-1))/2^(n-1))) * \<beta>"
-        by (simp add: comm_semiring_class.distrib)
-      ultimately show  "(2^n - (2::complex)) /(2^(n-1)) * \<beta> + ((1-2^(n-1))/2^(n-1)) * \<beta> = (2^(n-1) - 1) /2^(n-1) * \<beta>" 
-        by simp
+      also have "... = (2^n-(2::complex))/2 * 1/(2^(n-1))" 
+        using b1 dim pow_2_n_half by auto
+      also have "... = (2^n-(2::complex)) * 1/(2^n)" using b1 pow_2_n_half by auto
+      finally show "(2^n - (2::complex)) /(2^(n-1)) * \<beta> + ((1-2^(n-1))/2^(n-1)) * \<beta> = (2^n-2)/2^n*\<beta>" 
+        by (metis comm_semiring_class.distrib mult.right_neutral)
     qed
-    ultimately have "(D * v) $$ (i,j) = 1/2^(n-1)*-\<alpha> + (-1+2^(n-1))/2^(n-1)*\<beta>"
+    moreover have "1/2^(n-1)*-\<alpha> = 2/2^n*-\<alpha>" using h3 dim by auto
+    ultimately have "(D * v) $$ (i,j) = 2/2^n*-\<alpha> + (2^n-2)/2^n*\<beta>"
       by (metis (mono_tags, hide_lams) add_divide_distrib combine_common_factor power_one_over ring_class.ring_distribs(1) 
           semiring_normalization_rules(24) semiring_normalization_rules(7) uminus_add_conv_diff)
     then show "(D * v) $$ (i,j) = w $$ (i,j)" using assms a2 f0 by auto
@@ -408,11 +423,12 @@ proof-
   show ?thesis sorry
 qed
 
+
 lemma (in grover) app_diffusion_op_res:
   fixes \<alpha> \<beta>::complex 
   defines "v \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then -\<alpha> else \<beta>))"
-  defines "w \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then ((2^(n-1)-1)/2^(n-1))*\<alpha> + (2^n-1)/(2^(n-1))*\<beta>
-                                             else 1/2^(n-1)*-\<alpha> + (-1+2^(n-1))/2^(n-1)*\<beta> ))"
+  defines "w \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then ((2^n-2)/2^n)*\<alpha> + (2^n-1)/(2^(n-1))*\<beta>
+                                             else 2/2^n*-\<alpha> + (2^n-2)/2^n*\<beta> ))"
   assumes "state n v" 
   shows "(D \<Otimes> Id 1) * (v \<Otimes> (H * |one\<rangle>)) = w \<Otimes> (H * |one\<rangle>)" 
 proof-
@@ -577,16 +593,150 @@ next
   then show "grover_iter (Suc m) = (grover_iter_fst (Suc m)) \<Otimes> (H * |one\<rangle>)" by auto
 qed
 
+lemma h0[simp]:
+  shows "(1/sqrt(2)^n)\<^sup>2 = 1/2^n" sorry
 
-lemma 
-  assumes "-1 \<le> x" and "x \<le> 1"
-  shows "cos(arcsin(x)) = sqrt(1 - x\<^sup>2)" 
-  using cos_arcsin assms by auto
+lemma[simp]:
+  shows "1/sqrt(2)^n = sqrt(1/2^n)" sorry
+
+lemma h1[simp]:
+  shows "1/sqrt(2)^n * 1/sqrt(2)^n = 1/2^n" sorry
 
 
+lemma h2[simp]:
+  assumes "x \<ge> 0"
+  shows "sqrt(x)/x = 1/sqrt(x)" and "x/sqrt(x) = sqrt(x)" 
+   apply (metis (full_types) abs_of_nonneg assms div_by_0 divide_divide_eq_left divide_self_if 
+real_sqrt_divide real_sqrt_mult_self real_sqrt_one real_sqrt_zero sqrt_divide_self_eq)
+  by (simp add: assms real_div_sqrt)
 
 
-lemma (in grover)
+declare[[show_types]]
+
+lemma (in grover) double_sinus: (*Change name *)
+  fixes m
+  defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
+  shows "sin(2*\<theta>) = sqrt(2^n-1) * (2/2^n)"
+proof-
+  have "sin(2*\<theta>) = 2 * cos(\<theta>) * sin(\<theta>)" 
+    by (metis mult.commute mult.left_commute semigroup_mult_class.mult.assoc sin_double) 
+  moreover have f0: "-1 \<le> 1/sqrt(2)^n" 
+    by (meson le_minus_one_simps(1) order.trans real_sqrt_ge_0_iff zero_le_divide_1_iff zero_le_numeral zero_le_power)
+  moreover have "1/sqrt(2)^n \<le> 1" by simp
+  ultimately have "sin(2*\<theta>) = 2 * cos(\<theta>) * 1/sqrt(2)^n" 
+    using \<theta>_def sin_arcsin[of "1/sqrt(2)^n"] by (metis times_divide_eq_right)
+  also have "... = 2 * sqrt(1-(1/sqrt(2)^n)\<^sup>2) * 1/sqrt(2)^n" using \<theta>_def cos_arcsin f0 by auto
+  also have "... = 2 * sqrt((2^n-1)/2^n) * 1/sqrt(2)^n" by (simp add: diff_divide_distrib)
+  also have "... = 2 * (sqrt(2^n-1) * sqrt(1/2^n)) * 1/sqrt(2)^n"
+    by (metis mult.right_neutral real_sqrt_mult semigroup_mult_class.mult.assoc times_divide_eq_right)
+  also have "... = 2 * sqrt(2^n-1) * (1/sqrt(2)^n * 1/sqrt(2)^n)" by auto
+  also have "... = 2 * sqrt(2^n-1) * (1/sqrt(2)^n)\<^sup>2" 
+    by (metis (no_types, hide_lams) power_divide power_even_eq power_one power_one_right semiring_normalization_rules(36) times_divide_eq_right)
+  finally show ?thesis by simp
+qed
+
+lemma (in grover) double_cos: (*Change name *)
+  fixes m
+  defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
+  shows "cos(2*\<theta>) = ((2^n-2)/2^n)"
+proof-
+  have "cos(2*\<theta>) = (cos(\<theta>))\<^sup>2 - ((sin(\<theta>))\<^sup>2)" by (simp add: cos_double) 
+  moreover have f0: "-1 \<le> 1/sqrt(2)^n" 
+    by (meson le_minus_one_simps(1) order.trans real_sqrt_ge_0_iff zero_le_divide_1_iff zero_le_numeral zero_le_power)
+  ultimately have "cos(2*\<theta>) = (cos(\<theta>))\<^sup>2 - ((1/(sqrt(2)^n))\<^sup>2)" using \<theta>_def sin_arcsin by auto
+  also have "... = (cos(\<theta>))\<^sup>2 - (1/2^n)" using h0 by auto
+  also have "... = (sqrt(1-(1/sqrt(2)^n)\<^sup>2))\<^sup>2 - (1/2^n)" using \<theta>_def cos_arcsin f0 by auto
+  finally show ?thesis by (simp add: diff_divide_distrib)
+qed
+
+lemma (in grover) aux_grover_it_sin_rep:
+  fixes m
+  defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
+  shows "((2^n-2)/2^n) * (complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1)) * (complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+       = complex_of_real (sin((2*real (Suc m)+1)*\<theta>))" 
+proof- 
+  have "((2^n-2)/2^n)*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+= cos(2*\<theta>) * (sin((2*real m+1)*\<theta>)) + (2^n-1)/(2^(n-1)) * (complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))"
+     using double_cos \<theta>_def by auto
+  then have "((2^n-2)/2^n)*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+= cos(2*\<theta>) * (sin((2*real m+1)*\<theta>)) + (complex_of_real ((2^n-1)/(2^(n-1)) * 1/sqrt(2^n-1))) * (complex_of_real (cos((2*real m+1)*\<theta>)))"
+    by auto
+  moreover have "complex_of_real ((2^n-1)/(2^(n-1)) * 1/sqrt(2^n-1)) = complex_of_real(sin(2*\<theta>))" (*TODO: start with this *) 
+  proof-
+    have "sin(2*\<theta>) = sqrt(2^n-1) * (2/2^n)" using double_sinus \<theta>_def by auto
+    also have "... = sqrt(2^n-1) * 1/2^(n-1)" using dim h3 by auto
+    also have "... = ((2^n-1)/sqrt(2^n-1)) * 1/2^(n-1)" by simp
+    finally show "complex_of_real ((2^n-1)/(2^(n-1)) * 1/sqrt(2^n-1)) = complex_of_real(sin(2*\<theta>))" 
+      by (smt divide_divide_eq_left mult.commute)
+  qed
+  ultimately have "((2^n-2)/2^n)*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+= cos(2*\<theta>) * (sin((2*real m+1)*\<theta>)) + (sin(2*\<theta>)) * (complex_of_real (cos((2*real m+1)*\<theta>)))"
+    by presburger
+  then have "((2^n-2)/2^n)*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+= sin((2*real m+1)*\<theta>) * cos(2*\<theta>) + cos((2*real m+1)*\<theta>) * sin(2*\<theta>)" by simp
+  then have "((2^n-2)/2^n)*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+= (sin((2*real m+1)*\<theta>+2*\<theta>))"
+    using sin_add[of "(2*real m+1)*\<theta>" "2*\<theta>"] by auto
+  moreover have "(2*real m+1)*\<theta>+2*\<theta> = 2*real m*\<theta>+\<theta>+2*\<theta>" 
+    by (simp add: semiring_normalization_rules(2))
+  moreover have "2*real m*\<theta>+\<theta>+2*\<theta> = 2*(real m + 1)*\<theta>+\<theta>"
+    using semiring_normalization_rules(2)[of "real m" "2*\<theta>"] by linarith
+  moreover have "2*(real m + 1)*\<theta>+\<theta> = (2*(real m + 1)+1)*\<theta>" 
+    using semiring_normalization_rules(2)[of "2*(real m + 1)" "\<theta>"] by simp
+  ultimately have "((2^n-2)/2^n)*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+= (sin((2*(real m + 1)+1)*\<theta>))" by auto
+  then show "((2^n-2)/2^n)*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+       = complex_of_real (sin((2*real (Suc m)+1)*\<theta>))" 
+    by auto
+qed
+
+
+lemma (in grover) aux_grover_it_cos_rep:
+  fixes m
+  defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
+  shows "2/2^n*-(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+       = complex_of_real (1/sqrt(2^n-1)*cos((2*real (Suc m)+1)*\<theta>))"
+proof-    
+  have "2/2^n*-(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+      = -2/2^n*(sin((2*real m+1)*\<theta>)) + (2^n-2)/2^n*(1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>))"
+    by auto
+  moreover have "sqrt(2^n-1) \<noteq> 0" 
+    by (metis (no_types, hide_lams) add.left_neutral cancel_ab_semigroup_add_class.diff_right_commute diff_0 diff_eq_diff_less_eq 
+        diff_minus_eq_add diff_numeral_special(11) diff_zero dim eq_iff_diff_eq_0 le_minus_one_simps(1) le_minus_one_simps(3)
+        power_increasing real_sqrt_eq_zero_cancel_iff semiring_normalization_rules(33)) 
+  ultimately have "2/2^n * -(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+      = 1/sqrt(2^n-1) * (sqrt(2^n-1) * -2/2^n * (sin((2*real m+1)*\<theta>))) + 1/sqrt(2^n-1) * (2^n-2)/2^n*(cos((2*real m+1)*\<theta>))"
+    using divide_self_if by auto
+  then have "2/2^n * -(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+      = 1/sqrt(2^n-1) * (sqrt(2^n-1) * -2/2^n * (sin((2*real m+1)*\<theta>))) + 1/sqrt(2^n-1) * ((2^n-2)/2^n * cos((2*real m+1)*\<theta>))"
+    by auto
+  then have "2/2^n * -(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+      = 1/sqrt(2^n-1) * (sqrt(2^n-1) * -2/2^n * (sin((2*real m+1)*\<theta>)) + (2^n-2)/2^n * cos((2*real m+1)*\<theta>))"
+    using comm_semiring_class.distrib[of "(sqrt(2^n-1) * -2/2^n * (sin((2*real m+1)*\<theta>)))" "((2^n-2)/2^n * cos((2*real m+1)*\<theta>))"
+          "1/sqrt(2^n-1)"] mult.commute by auto
+  then have "2/2^n * -(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+      = 1/sqrt(2^n-1) * ((sqrt(2^n-1) * -2/2^n) * (sin((2*real m+1)*\<theta>)) + ((2^n-2)/2^n) * cos((2*real m+1)*\<theta>))"
+    by auto
+  moreover have "(sqrt(2^n-1) * -2/2^n) = -sin(2*\<theta>)" using double_sinus \<theta>_def by auto
+  moreover have "((2^n-2)/2^n) = cos(2*\<theta>)" using double_cos \<theta>_def by auto
+  ultimately have "2/2^n * -(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+      = 1/sqrt(2^n-1) * (-sin(2*\<theta>) * (sin((2*real m+1)*\<theta>)) + cos(2*\<theta>) * cos((2*real m+1)*\<theta>))"
+    by presburger
+  then have "2/2^n * -(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+      = 1/sqrt(2^n-1) * cos((2*real m+1)*\<theta>+2*\<theta>)" using cos_add[of "(2*real m+1)*\<theta>"] by auto
+   moreover have "(2*real m+1)*\<theta>+2*\<theta> = 2*real m*\<theta>+\<theta>+2*\<theta>"
+    by (simp add: semiring_normalization_rules(2))
+  moreover have "2*real m*\<theta>+\<theta>+2*\<theta> = 2*(real m + 1)*\<theta>+\<theta>"
+    using semiring_normalization_rules(2)[of "real m" "2*\<theta>"] by linarith
+  moreover have "2*(real m + 1)*\<theta>+\<theta> = (2*(real m + 1)+1)*\<theta>" 
+    using semiring_normalization_rules(2)[of "2*(real m + 1)" "\<theta>"] by simp
+  ultimately have "2/2^n * -(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+      = 1/sqrt(2^n-1) * cos((2*real (Suc m)+1)*\<theta>)" by auto
+  then show "2/2^n*-(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+       = complex_of_real (1/sqrt(2^n-1)*cos((2*real (Suc m)+1)*\<theta>))" by auto
+qed
+
+lemma (in grover) t2:
   defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
   shows "grover_iter m = (Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*m+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*m+1)*\<theta>)) )) \<Otimes> (H * |one\<rangle>)"
 proof(induction m)
@@ -624,15 +774,24 @@ proof(induction m)
         by (smt one_power2 power_divide real_sqrt_pow2 real_sqrt_power zero_le_power)
       ultimately have "(Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*real 0+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*real 0+1)*\<theta>)))) $$ (i,j)
           = 1/sqrt(2^n-1)*sqrt(1-1/2^n)" by auto
-      moreover have "sqrt(1-1/2^n) = sqrt((2^n-1)/2^n)"  sorry
+      moreover have "sqrt(1-1/2^n) = sqrt((2^n-1)/2^n)" 
+      proof-
+        have "sqrt(1-1/2^n) = sqrt(2^n/2^n-1/2^n)" by simp
+        then show "sqrt(1-1/2^n) = sqrt((2^n-1)/2^n)" 
+          by (metis diff_divide_distrib)
+      qed
+      moreover have "complex_of_real (1/sqrt(2^n-1)*sqrt((2^n-1)/2^n)) = complex_of_real (1/sqrt(2)^n)"
+      proof-
+        have "1/sqrt(2^n-1)*sqrt((2^n-1)/2^n) = sqrt(1/(2^n-1))*sqrt((2^n-1)/2^n)" by (simp add: real_sqrt_divide)
+        then have "1/sqrt(2^n-1)*sqrt((2^n-1)/2^n) = sqrt(1/(2^n-1)*(2^n-1)/2^n)" using real_sqrt_mult by (metis times_divide_eq_right)
+        then have "1/sqrt(2^n-1)*sqrt((2^n-1)/2^n) = sqrt((1/(2^n-1)*(2^n-1))*1/2^n)" by simp
+        then have "1/sqrt(2^n-1)*sqrt((2^n-1)/2^n) = sqrt(1/2^n)" 
+          by (smt dim divide_self_if one_power2 power2_eq_square power_increasing power_one_right times_divide_eq_left times_divide_eq_right)
+        then have "1/sqrt(2^n-1)*sqrt((2^n-1)/2^n) = 1/sqrt(2^n)" by (simp add: real_sqrt_divide)
+        then show "complex_of_real (1/sqrt(2^n-1)*sqrt((2^n-1)/2^n)) = complex_of_real (1/sqrt(2)^n)" by (simp add: real_sqrt_power)
+      qed
       ultimately have "(Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*real 0+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*real 0+1)*\<theta>)))) $$ (i,j)
-          = 1/sqrt(2^n-1)*sqrt((2^n-1)/2^n)" by auto
-      then have "(Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*real 0+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*real 0+1)*\<theta>)))) $$ (i,j)
-          = sqrt(1/2^n-1*(2^n-1)/2^n)" sorry
-      then have "(Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*real 0+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*real 0+1)*\<theta>)))) $$ (i,j)
-          = sqrt(1/2^n)" sorry
-      then have "(Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*real 0+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*real 0+1)*\<theta>)))) $$ (i,j)
-          = 1/sqrt(2)^n" sorry
+          = (1/sqrt(2)^n)" by auto
       then show "(\<psi>\<^sub>1\<^sub>0 n) $$ (i,j) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*real 0+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*real 0+1)*\<theta>)) )) $$ (i,j)"
         using a0 a1 a2 by auto
     qed
@@ -652,35 +811,37 @@ next
   then have "grover_iter (m+1) 
 = (D \<Otimes> Id 1) * (O * ((Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*real m+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)) )) \<Otimes> (H * |one\<rangle>)))"
     using IH by auto
-  then have "grover_iter (m+1) 
+  moreover have "(Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*real m+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)) ))
+= (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then complex_of_real (sin((2*real m+1)*\<theta>)) else complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>))))"
+    by auto
+  ultimately have "grover_iter (m+1) 
 = (D \<Otimes> Id 1) * (O * ((Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then complex_of_real (sin((2*real m+1)*\<theta>)) else complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))) \<Otimes> (H * |one\<rangle>)))"
-    sorry
+    by auto
   then have "grover_iter (m+1) = (D \<Otimes> Id 1) * ((Matrix.mat (2^n) 1 (\<lambda>(i,j). (if i=x then - complex_of_real (sin((2*real m+1)*\<theta>)) else complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>))))) \<Otimes> (H * |one\<rangle>))"
     using app_oracle[of "sin((2*real m+1)*\<theta>)" "1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)"] by auto
-  moreover have "state (n::nat) (Matrix.mat ((2::nat) ^ n) (1::nat) (\<lambda>(i::nat, j::nat). if i = (x::nat) then - complex_of_real (sin((2*real m+1)*\<theta>)) else complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>))))"
+  moreover have "state n (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then -complex_of_real (sin((2*real m+1)*\<theta>)) else complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>))))"
     sorry
   ultimately have "grover_iter (m+1) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x 
-then ((2^(n-1)-1)/2^(n-1))*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
-else 1/2^(n-1)*-(complex_of_real (sin((2*real m+1)*\<theta>))) + (-1+2^(n-1))/2^(n-1)*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>))) ))
+then ((2^n-2)/2^n)*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+else 2/2^n*-(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>))) ))
  \<Otimes> (H * |one\<rangle>)"
     using app_diffusion_op_res[of "complex_of_real (sin((2*real m+1)*\<theta>))" "complex_of_real(1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>))"] by auto
-  moreover have "((2^(n-1)-1)/2^(n-1))*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
-= sin((2*(Suc m)+1)*\<theta>)" sorry
-  moreover have "((2^(n-1)-1)/2^(n-1))*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
-= sin((2*(Suc m)+1)*\<theta>)" sorry
-
-
-
-
-
-
-lemma (in grover) app_diffusion_op_res:
-  fixes \<alpha> \<beta>::complex 
-  defines "v \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then -\<alpha> else \<beta>))"
-  defines "w \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then ((2^(n-1)-1)/2^(n-1))*\<alpha> + (2^n-1)/(2^(n-1))*\<beta>
-                                             else 1/2^(n-1)*-\<alpha> + (-1+2^(n-1))/2^(n-1)*\<beta> ))"
-  assumes "state n v" 
-  shows "(D \<Otimes> Id 1) * (v \<Otimes> (H * |one\<rangle>)) = w \<Otimes> (H * |one\<rangle>)" 
+  moreover have "((2^n-2)/2^n)*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+= complex_of_real (sin((2*real (Suc m)+1)*\<theta>))" 
+    using aux_grover_it_sin_rep \<theta>_def by auto
+  moreover have "2/2^n*-(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
+= complex_of_real (1/sqrt(2^n-1)*cos((2*real (Suc m)+1)*\<theta>))" 
+    using aux_grover_it_cos_rep \<theta>_def by auto
+  ultimately have "grover_iter (m+1) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). (if i=x then complex_of_real (sin((2*real (Suc m)+1)*\<theta>)) 
+else complex_of_real (1/sqrt(2^n-1)*cos((2* real (Suc m)+1)*\<theta>))) )) \<Otimes> (H * |one\<rangle>)"
+    by presburger
+  moreover have "(Matrix.mat (2^n) 1 (\<lambda>(i,j). (if i=x then complex_of_real (sin((2*real (Suc m)+1)*\<theta>)) 
+else complex_of_real (1/sqrt(2^n-1)*cos((2* real (Suc m)+1)*\<theta>))) ))
+=  (Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then (sin((2*real (Suc m)+1)*\<theta>)) 
+else (1/sqrt(2^n-1)*cos((2* real (Suc m)+1)*\<theta>))) ))" by auto
+  ultimately show "grover_iter (Suc m) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*real (Suc m)+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2* real (Suc m)+1)*\<theta>)) )) \<Otimes> (H * |one\<rangle>)"
+    by auto
+qed
 
 
 
@@ -688,8 +849,16 @@ lemma (in grover) app_diffusion_op_res:
 
 lemma (in grover) aux_prob_not_successful:
   assumes "y < 2^n" and "x \<noteq> y"
-  shows "(grover_iter iterations) $$ (y,0) = 1/sqrt(n-1)*cos((2*m+1)*\<theta>)"
-  sorry
+  shows "(cmod ((grover_iter_fst iterations) $$ (y,0)))\<^sup>2 = 1/sqrt(n-1)*cos((2*m+1)*\<theta>)"
+proof-
+  define \<theta> where "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
+  then have "grover_iter_fst iterations = (Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*iterations+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*iterations+1)*\<theta>)) ))"
+    using t2 grover_iter_grover_iter_fst_relation sorry
+  then have "(grover_iter_fst iterations) $$ (y,0)  = 1/sqrt(2^n-1)*cos((2*iterations+1)*\<theta>)" sorry
+  moreover have "(cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*\<theta>)))\<^sup>2 = 3"
+  proof
+
+
 
 
 lemma (in grover) prob_not_successful:
