@@ -295,7 +295,6 @@ next
   finally show "2^(Suc n)-2^((Suc n)-1) = (2::complex)^((Suc n)-1)" by simp
 qed
 
-declare[[show_types]]
 lemma b1 [simp]:
   assumes "n \<ge> 1"
   shows "((2^(n-1)-(1::complex))/2^(n-1)) = (2^n-2)/(2::complex)^n" 
@@ -410,19 +409,6 @@ proof-
     by (metis diff_add_cancel mult_2 pow_2_n_half times_divide_eq_right times_divide_times_eq)
 qed
 
-lemma (in grover) app_diffusion_op_index_recurence: (*Seems not to be needed delete. Maybe reformulate 
-to (-\<alpha> + (2^n-1)*\<beta>)/2^(n-1) to have more correspondence to last lemma*)
-  fixes \<alpha> \<beta>::complex
-  shows "1/2^(n-1)*-\<alpha> + (-1+2^(n-1))/2^(n-1)*\<beta> =  (-\<alpha> + (2^n-1)*\<beta>)/2^(n-1)" 
-proof-
-  have "1/2^(n-1)*-\<alpha> + (-1+2^(n-1))/2^(n-1)*\<beta> = 1/2^(n-1)*-\<alpha> + (-1*\<beta>)/2^(n-1)+(2^(n-1)*\<beta>)/2^(n-1)"
-    by (metis (mono_tags, lifting) add_divide_distrib distrib_right is_num_normalize(1) times_divide_eq_left)
-  then have "1/2^(n-1)*-\<alpha> + (-1+2^(n-1))/2^(n-1)*\<beta> = (-\<alpha> - \<beta>)/2^(n-1) + (2^(n-1)*\<beta>)/2^(n-1)" 
-    by (simp add: diff_divide_distrib)
-  then have "1/2^(n-1)*-\<alpha> + (-1+2^(n-1))/2^(n-1)*\<beta> =  ((-\<alpha> - \<beta>)/2^(n-1)) + \<beta>" by simp
-  show ?thesis sorry
-qed
-
 
 lemma (in grover) app_diffusion_op_res:
   fixes \<alpha> \<beta>::complex 
@@ -452,147 +438,6 @@ primrec (in grover) grover_iter::"nat\<Rightarrow>complex Matrix.mat" where
 "grover_iter (Suc m) = (D \<Otimes> Id 1) * (O * (grover_iter m))"
 
 
-
-
-
-
-
-
-
-
-
-
-
-(*O' is not a quantum gate.*)
-(*Find better name*)
-definition(in grover) q_oracel_fst::"complex Matrix.mat" ("O'") where
-"q_oracel_fst = Matrix.mat (2^n) (2^n) (\<lambda>(i,j). if (i=x \<and> i=j) then -1 else (if i=j then 1 else 0))"
-
-lemma (in grover) q_oracel_fst_values:
-  assumes "i<dim_row O' \<and> j<dim_col O'" and "i\<noteq>j" and "i\<noteq>x" 
-  shows "(O' $$ (i,j)) = 0" 
-  using assms q_oracel_fst_def by auto
-
-lemma (in grover) app_oracle':
-  fixes \<alpha> \<beta>::complex
-  defines "v \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
-  defines "w \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then -\<alpha> else \<beta>))"
-  shows "O' * v = w"
-proof
-  fix i j
-  assume a0: "i < dim_row w" and a1: "j < dim_col w" 
-  then have f0: "i < dim_row O' \<and> j < dim_col v" and "dim_col O' = dim_row v"
-    using q_oracel_fst_def w_def v_def by auto
-  then have "(O' * v) $$ (i, j) = (\<Sum>k \<in> {0..<2^n}. (O' $$ (i,k)) * (v $$ (k,j)))" 
-    using index_matrix_prod v_def by (simp add: atLeast0LessThan)
-  then have "(O' * v) $$ (i, j) = (\<Sum>k \<in> ({0..<2^n}-{i}). (O' $$ (i,k)) * (v $$ (k,j))) + (O' $$ (i,i)) * (v $$ (i,j))" 
-    by (metis (no_types, lifting) a0 add.commute atLeast0LessThan dim_row_mat(1) finite_atLeastLessThan insert_Diff insert_Diff_single lessThan_iff sum.insert_remove w_def)
-  then have "(O' * v) $$ (i, j) = (\<Sum>k \<in> ({0..<2^n}-{i}). 0 * (v $$ (k,j))) + (O' $$ (i,i)) * (v $$ (i,j))" 
-    using q_oracel_fst_def f0 v_def by auto
-  then have f1: "(O' * v) $$ (i, j) =  (O' $$ (i,i)) * (v $$ (i,j))"  by auto
-  show "(O' * v) $$ (i, j) = w $$ (i, j)"
-  proof (rule disjE)
-    show "i=x \<or> i\<noteq>x" by auto
-  next
-    assume a2: "i\<noteq>x"
-    then have "(O' * v) $$ (i, j) = \<beta>" using f0 f1 q_oracel_fst_def v_def by auto
-    then show "(O' * v) $$ (i, j) = w $$ (i, j)" 
-      using w_def a2 f0 a1 dim_row_mat(1) index_mat(1) old.prod.case q_oracel_fst_def by auto
-  next 
-    assume a2: "i=x"
-    then have "(O' * v) $$ (i, j) = (-1) * \<alpha>" using f0 f1 q_oracel_fst_def v_def by auto
-    then show "(O' * v) $$ (i, j) = w $$ (i, j)" using w_def a2 f0 q_oracel_fst_def v_def by auto
-  qed
-next
-  show "dim_row (O' * v) = dim_row w" 
-    using v_def w_def q_oracel_fst_def by auto
-next
-  show "dim_col (O' * v) = dim_col w" 
-    using v_def w_def q_oracel_fst_def by auto
-qed
-
-lemma(in grover) O_O'_relation: (*Rename*)
-  fixes \<alpha> \<beta>
-  defines "v \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
-  shows "O * (v \<Otimes> (H * |one\<rangle>)) = (O' * v) \<Otimes> (H * |one\<rangle>)" 
-proof-
-  have "O * (v \<Otimes> (H * |one\<rangle>)) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then -\<alpha> else \<beta>)) \<Otimes> (H * |one\<rangle>)"
-    using app_oracle v_def by blast
-  moreover have "(O' * v) \<Otimes> (H * |one\<rangle>) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then -\<alpha> else \<beta>)) \<Otimes> (H * |one\<rangle>)" 
-    using app_oracle' v_def by auto
-  ultimately show "O * (v \<Otimes> (H * |one\<rangle>)) = (O' * v) \<Otimes> (H * |one\<rangle>)" by auto
-qed
-
-abbreviation(in grover) start_state:: "complex Matrix.mat" where
-"start_state \<equiv> (\<psi>\<^sub>1 n)" (*(\<psi>\<^sub>1\<^sub>0 n)\<Otimes>(H * |one\<rangle>)"*)
-
-primrec (in grover) grover_iter_fst::"nat\<Rightarrow>complex Matrix.mat" where
-"grover_iter_fst 0 = (\<psi>\<^sub>1\<^sub>0 n)"|
-"grover_iter_fst (Suc m) = D * (O' * (grover_iter_fst m))"
-
-lemma (in grover) dim_grover_iter_fst:
-  shows "dim_row (grover_iter_fst m) = 2^n \<and> dim_col (grover_iter_fst m) = 1"
-proof(induction m)
-  show "dim_row (grover_iter_fst 0) = 2^n \<and> dim_col (grover_iter_fst 0) = 1" by auto
-next
-  fix m
-  assume IH: "dim_row (grover_iter_fst m) = 2^n \<and> dim_col (grover_iter_fst m) = 1"
-  then show "dim_row (grover_iter_fst (Suc m)) = 2^n \<and> dim_col (grover_iter_fst (Suc m)) = 1" 
-    by (simp add: IH diffusion_is_gate gate.dim_row)
-qed
-
-lemma (in grover) grover_iter_fst_res:
-  shows "\<exists>\<alpha> \<beta>::complex. (grover_iter_fst m) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
-proof(induction m)
-  show "\<exists>\<alpha> \<beta>::complex. (grover_iter_fst 0) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
-  proof(rule exI, rule exI)
-    have "(grover_iter_fst 0) = Matrix.mat (2^n) 1 (\<lambda>(i,j). 1/(sqrt(2))^n)" by auto
-    then have "(grover_iter_fst 0) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then  1/(sqrt(2))^n else 1/(sqrt(2))^n))" 
-      by auto
-    then show "(grover_iter_fst 0) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then (1/(sqrt(2))^n) else (1/(sqrt(2))^n::complex)))"  
-      by auto
-  qed
-next
-  fix m 
-  assume IH: "\<exists>\<alpha> \<beta>::complex. (grover_iter_fst m) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
-  obtain \<alpha> \<beta> where  "(grover_iter_fst m) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
-    using IH by auto
-  then have "(grover_iter_fst (Suc m)) = D * (O' * (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>)))"
-    by auto
-  then have "(grover_iter_fst (Suc m)) = D * (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then -\<alpha> else \<beta>))"
-    using app_oracle'[of "\<alpha>" "\<beta>"] by simp
-  then have "(grover_iter_fst (Suc m)) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then((2^(n-1)-1)/2^(n-1))*\<alpha> + (2^n-1)/(2^(n-1))*\<beta> 
-                                                                          else 1/2^(n-1)*-\<alpha> + (-1+2^(n-1))/2^(n-1)*\<beta>))"
-    using app_diffusion_op by auto
-  then show  "\<exists>\<alpha> \<beta>::complex. (grover_iter_fst (Suc m)) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
-    by blast
-qed
-
-
-lemma (in grover) grover_iter_grover_iter_fst_relation:
-  shows "grover_iter m = (grover_iter_fst m) \<Otimes> (H * |one\<rangle>)" 
-proof(induction m)
-  show  "grover_iter 0 = (grover_iter_fst 0) \<Otimes> (H * |one\<rangle>)" by auto
-next
-  fix m
-  assume IH: "grover_iter m = (grover_iter_fst m) \<Otimes> (H * |one\<rangle>)" 
-  have "grover_iter (Suc m) = (D \<Otimes> Id 1) * (O * (grover_iter m))" by auto
-  then have "(D \<Otimes> Id 1) * (O * (grover_iter m)) = (D \<Otimes> Id 1) * (O * ((grover_iter_fst m) \<Otimes> (H * |one\<rangle>)))"
-    using IH by auto
-  moreover have "O * ((grover_iter_fst m) \<Otimes> (H * |one\<rangle>)) = (O' * (grover_iter_fst m)) \<Otimes> (H * |one\<rangle>)" 
-    using O_O'_relation by (metis grover_iter_fst_res)
-  then have "(D \<Otimes> Id 1) * (O * (grover_iter m)) = (D \<Otimes> Id 1) * ((O' * (grover_iter_fst m)) \<Otimes> (H * |one\<rangle>))"
-     using  IH by auto
-  then have "(D \<Otimes> Id 1) * (O * (grover_iter m)) = (D * (O' * (grover_iter_fst m))) \<Otimes> (Id 1 * (H * |one\<rangle>))"
-    using mult_distr_tensor[of D "(O' * (grover_iter_fst m))" "Id 1" "(H * |one\<rangle>)"] ket_vec_def Id_def 
-          diffusion_operator_def q_oracel_fst_def \<psi>\<^sub>1\<^sub>1_is_state state_def dim_grover_iter_fst by auto
-  moreover have "(Id 1 * (H * |one\<rangle>)) = (H * |one\<rangle>)" 
-    using H_on_ket_one_is_\<psi>\<^sub>1\<^sub>1 Quantum.Id_def by auto
-  ultimately have "(D \<Otimes> Id 1) * (O * (grover_iter m)) 
-                 = (D * (O' * (grover_iter_fst m))) \<Otimes> (H * |one\<rangle>)" by auto
-  then show "grover_iter (Suc m) = (grover_iter_fst (Suc m)) \<Otimes> (H * |one\<rangle>)" by auto
-qed
-
 lemma h0[simp]:
   shows "(1/sqrt(2)^n)\<^sup>2 = 1/2^n" sorry
 
@@ -611,7 +456,6 @@ real_sqrt_divide real_sqrt_mult_self real_sqrt_one real_sqrt_zero sqrt_divide_se
   by (simp add: assms real_div_sqrt)
 
 
-declare[[show_types]]
 
 lemma (in grover) double_sinus: (*Change name *)
   fixes m
@@ -844,6 +688,327 @@ else (1/sqrt(2^n-1)*cos((2* real (Suc m)+1)*\<theta>))) ))" by auto
 qed
 
 
+lemma (in grover) o1[simp]:
+  shows "1/sqrt(2)^n \<le> (sin 1)" sorry
+
+lemma (in grover) o2:
+  fixes a b c d::real
+  assumes "a \<ge> b" and "c \<ge> d" and "b\<ge>1" and "d\<ge>0"
+  shows "a * c \<ge> b * d"  
+  using assms using mult_mono by fastforce
+
+
+lemma (in grover)
+  defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
+  defines "it \<equiv> pi/4*\<theta>"
+  shows "(cmod (1/sqrt(2^n-1)*cos((2*it+1)*complex_of_real \<theta>)))\<^sup>2 \<le> 1/(2^n-1) * 1/2^n"
+proof-
+  have f0: "-1 \<le> 1/(sqrt(2)^n)" 
+    by (smt real_sqrt_ge_0_iff zero_le_divide_1_iff zero_le_power)
+  moreover have f1: "1/(sqrt(2)^n) \<le> 1" by simp
+  ultimately have f2: "\<theta> \<le> pi/2" and f2b: "\<theta> \<ge> -pi/2" using arcsin_bounded[of "1/(sqrt(2)^n)"] \<theta>_def by auto
+
+  have f3: "\<theta> \<ge> 0" using \<theta>_def arcsin_le_mono[of 0] by simp
+  moreover have "arcsin (sin (1/sqrt(2)^n)) = 1/sqrt(2)^n" 
+    using f1 f2 f3
+    by (smt abs_sin_x_le_abs_x arcsin_sin real_sqrt_ge_0_iff sin_pi_half zero_le_divide_1_iff zero_le_power)
+  ultimately have f4: "\<theta> \<ge> 1/sqrt(2)^n" using \<theta>_def arcsin_le_mono
+    using f0 f1 by (metis (full_types) abs_le_D1 abs_of_nonneg abs_sin_x_le_abs_x arcsin)
+
+ have "arcsin (sin (1::real)) = 1"
+    by (metis (full_types) arcsin_0 arcsin_1 arcsin_lt_bounded arcsin_minus_1 arcsin_sin le_less_linear 
+        less_minus_one_simps(1) less_numeral_extra(1) not_less_iff_gr_or_eq sin_pi_half sin_x_ge_neg_x sin_x_le_x)
+  moreover have "1/sqrt(2)^n \<le> (sin 1)" using o1 by auto
+  ultimately have f5: "\<theta> \<le> 1" using \<theta>_def arcsin_le_mono[of "1/sqrt(2)^n" "sin (1)"] by auto
+  
+  have "-1/\<theta> \<le> -1"sorry
+
+  have j2:"(2*((pi-2*\<theta>)/4*\<theta>)+1)*\<theta> = pi/2" sorry
+  then have "abs ((2*\<lfloor>it\<rfloor>+1)*\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta>) \<le> \<theta>"  
+  proof-
+    have "\<lfloor>it\<rfloor>-(pi-2*\<theta>)/4*\<theta> \<le> 1/2" 
+    proof-
+      have "-(pi-2*\<theta>)/4*\<theta> = (-pi+2*\<theta>)/4*\<theta>" by auto
+      then have "-(pi-2*\<theta>)/4*\<theta> = -pi/4*\<theta>+2*\<theta>/4*\<theta>" 
+        by (simp add: left_diff_distrib)
+      then have "-(pi-2*\<theta>)/4*\<theta> = -pi/4*\<theta>+\<theta>\<^sup>2/2" sorry
+      then have "\<lfloor>it\<rfloor>-(pi-2*\<theta>)/4*\<theta> \<le> \<lfloor>pi/4*\<theta>\<rfloor>-pi/4*\<theta>+\<theta>\<^sup>2/2" using it_def by (smt divide_minus_left mult_minus_left)
+      moreover have "\<lfloor>pi/4*\<theta>\<rfloor>-pi/4*\<theta> \<le> 0" by linarith
+      moreover have "\<theta>\<^sup>2 \<le> 1" using f5 by (simp add: f3 power_le_one)
+      ultimately show "\<lfloor>it\<rfloor>-(pi-2*\<theta>)/4*\<theta> \<le> 1/2" by linarith
+    qed
+    then have "\<lfloor>it\<rfloor> \<le> 1/2+(pi-2*\<theta>)/4*\<theta>" by linarith
+    then have "2*\<lfloor>it\<rfloor>*\<theta> \<le> 2*(1/2+(pi-2*\<theta>)/4*\<theta>)*\<theta>" 
+      by (smt divide_nonneg_nonneg f3 f5 mult_mono mult_nonneg_nonneg of_int_add pi_ge_two)
+    moreover have "(2*\<lfloor>it\<rfloor>+1)*\<theta> = 2*\<lfloor>it\<rfloor>*\<theta> + \<theta>" 
+      by (metis (no_types, hide_lams) add.commute add.left_commute add.right_neutral add_left_cancel dbl_def diff_add_cancel diff_eq_eq distrib_left mult.right_neutral mult_2_right mult_hom.hom_add mult_zero_right of_int_add of_int_hom.hom_add of_int_hom.hom_one of_int_simps(1) semiring_normalization_rules(22) semiring_normalization_rules(7))
+    ultimately have "(2*\<lfloor>it\<rfloor>+1)*\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta> \<le> 2*(1/2+(pi-2*\<theta>)/4*\<theta>)*\<theta> + \<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta>"
+      by auto
+    then have "(2*\<lfloor>it\<rfloor>+1)*\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta> \<le> 2*(1/2+(pi-2*\<theta>)/4*\<theta>)*\<theta> + \<theta> - (2*(pi-2*\<theta>)/4*\<theta>*\<theta> + \<theta>)"
+      using distrib_right[of "2*(pi-2*\<theta>)/4*\<theta>" 1 \<theta>]  by auto
+    then have "(2*\<lfloor>it\<rfloor>+1)*\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta> \<le> 2*(1/2+(pi-2*\<theta>)/4*\<theta>)*\<theta> - 2*(pi-2*\<theta>)/4*\<theta>*\<theta>"
+      by auto
+    then have "(2*\<lfloor>it\<rfloor>+1)*\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta> \<le> (1+2*(pi-2*\<theta>)/4*\<theta>)*\<theta> - 2*(pi-2*\<theta>)/4*\<theta>*\<theta>"
+      using distrib_left[of 2 "1/2" "(pi-2*\<theta>)/4*\<theta>"] sorry
+    then have "(2*\<lfloor>it\<rfloor>+1)*\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta> \<le> \<theta>+2*(pi-2*\<theta>)/4*\<theta>*\<theta> - 2*(pi-2*\<theta>)/4*\<theta>*\<theta>"
+      using distrib_right[of 1 "2*(pi-2*\<theta>)/4*\<theta>" \<theta>]  by auto
+    then have "(2*\<lfloor>it\<rfloor>+1)*\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta> \<le> \<theta>"
+      by auto
+
+
+    then have "2*\<lfloor>it\<rfloor>*\<theta>+\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta> \<le> 2*(1/2+(pi-2*\<theta>)/4*\<theta>)*\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta> " 
+    then have "2*\<lfloor>it\<rfloor>*\<theta>+\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta> \<le> ((1+(pi-2*\<theta>)/2*\<theta>) - (2*(pi-2*\<theta>)/4*\<theta>+1)) *\<theta> " sorry
+    then have "2*\<lfloor>it\<rfloor>*\<theta>+\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta> \<le> ((1+(pi-2*\<theta>)/2*\<theta>) - (pi-2*\<theta>)/2*\<theta>-1) *\<theta> " sorry
+    then have "2*\<lfloor>it\<rfloor>*\<theta>+\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta> \<le> (((pi-2*\<theta>)/2*\<theta>) - (pi-2*\<theta>)/2*\<theta>) *\<theta> " sorry
+    then have "2*\<lfloor>it\<rfloor>*\<theta>+\<theta> - (2*(pi-2*\<theta>)/4*\<theta>+1)*\<theta> \<le> 0*\<theta> " sorry
+
+
+
+
+
+
+    then have "(2*\<lfloor>it\<rfloor>+1)*\<theta> - pi/2 \<le> (1+(pi-2*\<theta>)/(2*\<theta>))*\<theta> - pi/2" sorry
+    have "(2*\<lfloor>it\<rfloor>+1)*\<theta> - pi/2 \<le> (\<theta>+(pi-2*\<theta>)/2) - pi/2" sorry
+    have "(2*\<lfloor>it\<rfloor>+1)*\<theta> - pi/2 \<le> \<theta>+pi/2-\<theta> - pi/2" sorry
+    have "(2*\<lfloor>it\<rfloor>+1)*\<theta> - pi/2 \<le> 0" sorry
+
+    have "-\<lfloor>it\<rfloor>+(pi-2*\<theta>)/(4*\<theta>) \<le> 1/2" sorry
+    have "-\<lfloor>it\<rfloor> \<le> 1/2-(pi-2*\<theta>)/(4*\<theta>)" sorry
+    have "-(2*\<lfloor>it\<rfloor>+1)*\<theta> + pi/2 = -2*\<lfloor>it\<rfloor>*\<theta>-\<theta>+pi/2" sorry
+    have "-(2*\<lfloor>it\<rfloor>+1)*\<theta> + pi/2 \<le> 2*(1/2-(pi-2*\<theta>)/(4*\<theta>))*\<theta>-\<theta>+pi/2" sorry
+    have "-(2*\<lfloor>it\<rfloor>+1)*\<theta> + pi/2 \<le> \<theta>-(pi-2*\<theta>)/2-\<theta>+pi/2" sorry
+    have "-(2*\<lfloor>it\<rfloor>+1)*\<theta> + pi/2 \<le> \<theta>-pi/2+\<theta>-\<theta>+pi/2" sorry
+    have "-(2*\<lfloor>it\<rfloor>+1)*\<theta> + pi/2 \<le> \<theta>" sorry
+
+
+  have "abs ((pi/2*\<theta>+1)*\<theta> - pi/2) \<le> \<theta>" 
+  proof-
+
+    have "pi/2*\<theta>\<^sup>2+2*\<theta> \<ge> pi/2"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  have "(pi/2*\<theta>+1)*\<theta> - pi/2 \<le> \<theta>" sorry
+
+  have "-(pi/2*\<theta>+1)*\<theta> + pi/2 \<le> \<theta>" sorry
+  moreover have " - (pi / 2 * \<theta> + 1) * \<theta> + pi / 2 \<le> pi / 2" sorry
+  moreover have "- (pi / 2) \<le> - (pi / 2 * \<theta> + 1) * \<theta> + pi / 2 " sorry (* siehe unten
+  ultimately have "sin(-(pi/2*\<theta>+1)*\<theta> + pi/2) \<le> sin(\<theta>)"
+     using sin_mono_le_eq[of "-(pi/2*\<theta>+1)*\<theta> + pi/2" "\<theta>" ] f2b f2 by auto
+(*So SOLLTE es klappen *)
+
+
+  have "(cos ((pi/2*\<theta>+1)*\<theta>))\<^sup>2 = 1/2*((cos(2*(pi/2*\<theta> + 1) * \<theta>))+1)" sorry
+  have "(cos ((pi/2*\<theta>+1)*\<theta>))\<^sup>2 = 1/2*((cos(pi*\<theta>\<^sup>2 + 2*\<theta>))+1)" sorry
+
+  have "pi*\<theta>\<^sup>2 + 2*\<theta>+pi/2 \<le> \<theta>" sorry
+  have "sin(pi*\<theta>\<^sup>2 + 2*\<theta>+pi/2) \<le> sin(\<theta>)"
+    using sin_mono_less_eq[of "pi*\<theta>\<^sup>2 + 2*\<theta>+pi/2" "\<theta>"]
+
+ have "arcsin (sin (1::real)) = 1"
+    by (metis (full_types) arcsin_0 arcsin_1 arcsin_lt_bounded arcsin_minus_1 arcsin_sin le_less_linear 
+        less_minus_one_simps(1) less_numeral_extra(1) not_less_iff_gr_or_eq sin_pi_half sin_x_ge_neg_x sin_x_le_x)
+  moreover have "1/sqrt(2)^n \<le> (sin 1)" using o1 by auto
+  ultimately have f5: "\<theta> \<le> 1" using \<theta>_def arcsin_le_mono[of "1/sqrt(2)^n" "sin (1)"] by auto
+  have "\<theta> \<ge> -1" sorry
+ 
+
+
+
+
+  have "-pi/2 \<le> -((2*it+1)*\<theta>) + pi/2"
+  proof-
+    have "((2*it+1)*\<theta>) = (2*pi/4*\<theta>+1)*\<theta>" using it_def by auto
+    moreover have "(2*pi/4*\<theta>+1) \<le> pi" 
+    proof-
+      have "2*pi/4*\<theta> \<le> pi/2" using f5 by auto
+      moreover have "(pi/2+1) \<le> pi" using pi_ge_two by linarith
+      ultimately show "(2*pi/4*\<theta>+1) \<le> pi" using f5 
+        by (smt divide_le_eq_1_pos divide_nonneg_nonneg f3 mult_nonneg_nonneg nonzero_mult_div_cancel_left pi_ge_zero)
+    qed
+    ultimately have "((2*it+1)*\<theta>) \<le> pi" using f5  
+      by (smt divide_le_eq_1_pos divide_nonneg_nonneg f3 mult_nonneg_nonneg nonzero_mult_div_cancel_left pi_ge_zero)
+    then show ?thesis by auto
+  qed
+  moreover have "- ((2 * it + 1) * \<theta>) + pi / 2 \<le> \<theta>" 
+
+
+
+  ultimately have "sin(-((2*it+1)*\<theta>)+pi/2) \<le> sin(\<theta>)" 
+using sin_mono_le_eq[of "-((2*it+1)*\<theta>)+pi/2" "\<theta>"] f2 f2b by auto
+
+
+  moreover have "cos((2*it+1)*\<theta>) = sin(-((2*it+1)*\<theta>)+pi/2)" 
+    using cos_sin_eq[of "(2*it+1)*\<theta>"] by auto
+  ultimately have t1: "cos((2*it+1)*\<theta>) \<le> sin \<theta>" by auto
+  then have "(cmod (1/sqrt(2^n-1)*cos((2*it+1)*\<theta>)))\<^sup>2 = (sqrt ((Re (1/sqrt(2^n-1)*cos((2*it+1)*\<theta>)))\<^sup>2 + (Im (1/sqrt(2^n-1)*cos((2*it+1)*\<theta>)))\<^sup>2))\<^sup>2" 
+    using cmod_def by auto
+  moreover have "(Re (1/sqrt(2^n-1)*cos((2*it+1)*\<theta>)))\<^sup>2 \<le> 1/(2^n-1)*1/2^n" 
+    using t1 sorry
+  moreover have "(Im (1/sqrt(2^n-1)*cos((2*it+1)*\<theta>)))\<^sup>2 = 0" sorry
+  ultimately have "(cmod (1/sqrt(2^n-1)*cos((2*it+1)*\<theta>)))\<^sup>2 \<le> (sqrt (1/(2^n-1)*1/2^n))\<^sup>2" 
+    sorry
+  then have "(cmod (1/sqrt(2^n-1)*cos((2*it+1)*\<theta>)))\<^sup>2 \<le> (1/(2^n-1)*1/2^n)" sorry 
+  then have "(cmod (1/sqrt(2^n-1)*cos((2*it+1)*\<theta>)))\<^sup>2 \<le> (1/(2^n-1)*1/2^n)" sorry
+  then show ?thesis sorry
+qed
+
+
+
+lemma (in grover)
+  defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
+  shows "(cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2 \<le> 1/(2^n-1) * 1/2^n"
+  sorry
+
+
+
+
+
+
+
+
+
+(*O' is not a quantum gate.*)
+(*Find better name*)
+definition(in grover) q_oracel_fst::"complex Matrix.mat" ("O'") where
+"q_oracel_fst = Matrix.mat (2^n) (2^n) (\<lambda>(i,j). if (i=x \<and> i=j) then -1 else (if i=j then 1 else 0))"
+
+lemma (in grover) q_oracel_fst_values:
+  assumes "i<dim_row O' \<and> j<dim_col O'" and "i\<noteq>j" and "i\<noteq>x" 
+  shows "(O' $$ (i,j)) = 0" 
+  using assms q_oracel_fst_def by auto
+
+lemma (in grover) app_oracle':
+  fixes \<alpha> \<beta>::complex
+  defines "v \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
+  defines "w \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then -\<alpha> else \<beta>))"
+  shows "O' * v = w"
+proof
+  fix i j
+  assume a0: "i < dim_row w" and a1: "j < dim_col w" 
+  then have f0: "i < dim_row O' \<and> j < dim_col v" and "dim_col O' = dim_row v"
+    using q_oracel_fst_def w_def v_def by auto
+  then have "(O' * v) $$ (i, j) = (\<Sum>k \<in> {0..<2^n}. (O' $$ (i,k)) * (v $$ (k,j)))" 
+    using index_matrix_prod v_def by (simp add: atLeast0LessThan)
+  then have "(O' * v) $$ (i, j) = (\<Sum>k \<in> ({0..<2^n}-{i}). (O' $$ (i,k)) * (v $$ (k,j))) + (O' $$ (i,i)) * (v $$ (i,j))" 
+    by (metis (no_types, lifting) a0 add.commute atLeast0LessThan dim_row_mat(1) finite_atLeastLessThan insert_Diff insert_Diff_single lessThan_iff sum.insert_remove w_def)
+  then have "(O' * v) $$ (i, j) = (\<Sum>k \<in> ({0..<2^n}-{i}). 0 * (v $$ (k,j))) + (O' $$ (i,i)) * (v $$ (i,j))" 
+    using q_oracel_fst_def f0 v_def by auto
+  then have f1: "(O' * v) $$ (i, j) =  (O' $$ (i,i)) * (v $$ (i,j))"  by auto
+  show "(O' * v) $$ (i, j) = w $$ (i, j)"
+  proof (rule disjE)
+    show "i=x \<or> i\<noteq>x" by auto
+  next
+    assume a2: "i\<noteq>x"
+    then have "(O' * v) $$ (i, j) = \<beta>" using f0 f1 q_oracel_fst_def v_def by auto
+    then show "(O' * v) $$ (i, j) = w $$ (i, j)" 
+      using w_def a2 f0 a1 dim_row_mat(1) index_mat(1) old.prod.case q_oracel_fst_def by auto
+  next 
+    assume a2: "i=x"
+    then have "(O' * v) $$ (i, j) = (-1) * \<alpha>" using f0 f1 q_oracel_fst_def v_def by auto
+    then show "(O' * v) $$ (i, j) = w $$ (i, j)" using w_def a2 f0 q_oracel_fst_def v_def by auto
+  qed
+next
+  show "dim_row (O' * v) = dim_row w" 
+    using v_def w_def q_oracel_fst_def by auto
+next
+  show "dim_col (O' * v) = dim_col w" 
+    using v_def w_def q_oracel_fst_def by auto
+qed
+
+lemma(in grover) O_O'_relation: (*Rename*)
+  fixes \<alpha> \<beta>
+  defines "v \<equiv> (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
+  shows "O * (v \<Otimes> (H * |one\<rangle>)) = (O' * v) \<Otimes> (H * |one\<rangle>)" 
+proof-
+  have "O * (v \<Otimes> (H * |one\<rangle>)) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then -\<alpha> else \<beta>)) \<Otimes> (H * |one\<rangle>)"
+    using app_oracle v_def by blast
+  moreover have "(O' * v) \<Otimes> (H * |one\<rangle>) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then -\<alpha> else \<beta>)) \<Otimes> (H * |one\<rangle>)" 
+    using app_oracle' v_def by auto
+  ultimately show "O * (v \<Otimes> (H * |one\<rangle>)) = (O' * v) \<Otimes> (H * |one\<rangle>)" by auto
+qed
+
+abbreviation(in grover) start_state:: "complex Matrix.mat" where
+"start_state \<equiv> (\<psi>\<^sub>1 n)" (*(\<psi>\<^sub>1\<^sub>0 n)\<Otimes>(H * |one\<rangle>)"*)
+
+primrec (in grover) grover_iter_fst::"nat\<Rightarrow>complex Matrix.mat" where
+"grover_iter_fst 0 = (\<psi>\<^sub>1\<^sub>0 n)"|
+"grover_iter_fst (Suc m) = D * (O' * (grover_iter_fst m))"
+
+lemma (in grover) dim_grover_iter_fst:
+  shows "dim_row (grover_iter_fst m) = 2^n \<and> dim_col (grover_iter_fst m) = 1"
+proof(induction m)
+  show "dim_row (grover_iter_fst 0) = 2^n \<and> dim_col (grover_iter_fst 0) = 1" by auto
+next
+  fix m
+  assume IH: "dim_row (grover_iter_fst m) = 2^n \<and> dim_col (grover_iter_fst m) = 1"
+  then show "dim_row (grover_iter_fst (Suc m)) = 2^n \<and> dim_col (grover_iter_fst (Suc m)) = 1" 
+    by (simp add: IH diffusion_is_gate gate.dim_row)
+qed
+
+lemma (in grover) grover_iter_fst_res:
+  shows "\<exists>\<alpha> \<beta>::complex. (grover_iter_fst m) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
+proof(induction m)
+  show "\<exists>\<alpha> \<beta>::complex. (grover_iter_fst 0) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
+  proof(rule exI, rule exI)
+    have "(grover_iter_fst 0) = Matrix.mat (2^n) 1 (\<lambda>(i,j). 1/(sqrt(2))^n)" by auto
+    then have "(grover_iter_fst 0) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then  1/(sqrt(2))^n else 1/(sqrt(2))^n))" 
+      by auto
+    then show "(grover_iter_fst 0) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then (1/(sqrt(2))^n) else (1/(sqrt(2))^n::complex)))"  
+      by auto
+  qed
+next
+  fix m 
+  assume IH: "\<exists>\<alpha> \<beta>::complex. (grover_iter_fst m) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
+  obtain \<alpha> \<beta> where  "(grover_iter_fst m) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
+    using IH by auto
+  then have "(grover_iter_fst (Suc m)) = D * (O' * (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>)))"
+    by auto
+  then have "(grover_iter_fst (Suc m)) = D * (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then -\<alpha> else \<beta>))"
+    using app_oracle'[of "\<alpha>" "\<beta>"] by simp
+  then have "(grover_iter_fst (Suc m)) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then((2^(n-1)-1)/2^(n-1))*\<alpha> + (2^n-1)/(2^(n-1))*\<beta> 
+                                                                          else 1/2^(n-1)*-\<alpha> + (-1+2^(n-1))/2^(n-1)*\<beta>))"
+    using app_diffusion_op by auto
+  then show  "\<exists>\<alpha> \<beta>::complex. (grover_iter_fst (Suc m)) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). if i=x then \<alpha> else \<beta>))"
+    by blast
+qed
+
+
+lemma (in grover) grover_iter_grover_iter_fst_relation:
+  shows "grover_iter m = (grover_iter_fst m) \<Otimes> (H * |one\<rangle>)" 
+proof(induction m)
+  show  "grover_iter 0 = (grover_iter_fst 0) \<Otimes> (H * |one\<rangle>)" by auto
+next
+  fix m
+  assume IH: "grover_iter m = (grover_iter_fst m) \<Otimes> (H * |one\<rangle>)" 
+  have "grover_iter (Suc m) = (D \<Otimes> Id 1) * (O * (grover_iter m))" by auto
+  then have "(D \<Otimes> Id 1) * (O * (grover_iter m)) = (D \<Otimes> Id 1) * (O * ((grover_iter_fst m) \<Otimes> (H * |one\<rangle>)))"
+    using IH by auto
+  moreover have "O * ((grover_iter_fst m) \<Otimes> (H * |one\<rangle>)) = (O' * (grover_iter_fst m)) \<Otimes> (H * |one\<rangle>)" 
+    using O_O'_relation by (metis grover_iter_fst_res)
+  then have "(D \<Otimes> Id 1) * (O * (grover_iter m)) = (D \<Otimes> Id 1) * ((O' * (grover_iter_fst m)) \<Otimes> (H * |one\<rangle>))"
+     using  IH by auto
+  then have "(D \<Otimes> Id 1) * (O * (grover_iter m)) = (D * (O' * (grover_iter_fst m))) \<Otimes> (Id 1 * (H * |one\<rangle>))"
+    using mult_distr_tensor[of D "(O' * (grover_iter_fst m))" "Id 1" "(H * |one\<rangle>)"] ket_vec_def Id_def 
+          diffusion_operator_def q_oracel_fst_def \<psi>\<^sub>1\<^sub>1_is_state state_def dim_grover_iter_fst by auto
+  moreover have "(Id 1 * (H * |one\<rangle>)) = (H * |one\<rangle>)" 
+    using H_on_ket_one_is_\<psi>\<^sub>1\<^sub>1 Quantum.Id_def by auto
+  ultimately have "(D \<Otimes> Id 1) * (O * (grover_iter m)) 
+                 = (D * (O' * (grover_iter_fst m))) \<Otimes> (H * |one\<rangle>)" by auto
+  then show "grover_iter (Suc m) = (grover_iter_fst (Suc m)) \<Otimes> (H * |one\<rangle>)" by auto
+qed
 
 
 
@@ -855,7 +1020,7 @@ proof-
   then have "grover_iter_fst iterations = (Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*iterations+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*iterations+1)*\<theta>)) ))"
     using t2 grover_iter_grover_iter_fst_relation sorry
   then have "(grover_iter_fst iterations) $$ (y,0)  = 1/sqrt(2^n-1)*cos((2*iterations+1)*\<theta>)" sorry
-  moreover have "(cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*\<theta>)))\<^sup>2 = 3"
+  moreover have "(cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*\<theta>)))\<^sup>2 = 3" 
   proof
 
 
