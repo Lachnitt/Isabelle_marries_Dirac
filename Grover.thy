@@ -778,7 +778,8 @@ lemma aux_sqrt_2_sin [simp]:
 
 (* I followed the proof here:  https://arxiv.org/pdf/quant-ph/9605034.pdf
 To prove that "abs (cos((2*\<lfloor>it\<rfloor>+1)*\<theta>)) \<le> (sin(\<theta>))" was fine but its hard to prove that 
-"abs (cos((2*iterations+1)*\<theta>)) \<le> (sin(\<theta>))" *)
+"abs (cos((2*iterations+1)*\<theta>)) \<le> (sin(\<theta>))" If it was possible the power of 2 problem in prob_no_success
+would vanish. *)
 (*In the paper it just says \<theta> \<approx> sin(\<theta>) = 1/sqrt(2)^n. I tried to find a bound for the difference *)
 lemma (in grover) aux_prob_no_success:
   fixes \<theta>::real
