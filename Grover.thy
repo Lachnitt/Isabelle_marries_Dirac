@@ -293,6 +293,7 @@ lemma (in grover) aux_calculation_pow_2[simp]:
   and "(1/sqrt(2)^n)\<^sup>2 = 1/2^n"
   and "1/sqrt(2)^n * 1/sqrt(2)^n = 1/2^n" (* Still needed? *)
   and "1/sqrt(2)^n = sqrt(1/2^n)" 
+  and "((2^n-1)/sqrt(2^n-1)) = sqrt(2^n-1)"
 proof-
   show "(2::complex)/2^n = 1/2^(n-1)" using dim 
     by (metis (no_types, lifting) One_nat_def Suc_diff_le diff_Suc_Suc diff_zero divide_divide_eq_left divide_self_if power.simps(2) zero_neq_numeral)
@@ -311,6 +312,9 @@ next
 next
   show "1/sqrt(2)^n = sqrt(1/2^n)" 
     by (simp add: real_sqrt_divide real_sqrt_power)
+next
+  show "((2^n-1)/sqrt(2^n-1)) = sqrt(2^n-1)" 
+    by (smt minus_divide_right nonzero_mult_div_cancel_left one_le_power power2_eq_square real_sqrt_pow2)
 qed
 
 
@@ -452,9 +456,7 @@ theorem (in grover) grover_algo_is_state:
   using grover_iter_is_state 
   by (simp add: grover_algo_def)
 
-declare[[show_types]]
 lemma (in grover) double_sinus:
-  fixes m
   defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
   shows "sin(2*\<theta>) = sqrt(2^n-1) * (2/2^n)"
 proof-
@@ -478,7 +480,6 @@ proof-
 qed
 
 lemma (in grover) double_cos:
-  fixes m
   defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
   shows "cos(2*\<theta>) = ((2^n-2)/2^n)"
 proof-
@@ -504,11 +505,11 @@ proof-
   then have "((2^n-2)/2^n)*(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-1)/(2^(n-1))*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
 = cos(2*\<theta>) * (sin((2*real m+1)*\<theta>)) + (complex_of_real ((2^n-1)/(2^(n-1)) * 1/sqrt(2^n-1))) * (complex_of_real (cos((2*real m+1)*\<theta>)))"
     by auto
-  moreover have "complex_of_real ((2^n-1)/(2^(n-1)) * 1/sqrt(2^n-1)) = complex_of_real(sin(2*\<theta>))" (*TODO: start with this *) 
+  moreover have "complex_of_real ((2^n-1)/(2^(n-1)) * 1/sqrt(2^n-1)) = complex_of_real(sin(2*\<theta>))"
   proof-
-    have "sin(2*\<theta>) = sqrt(2^n-1) * (2/2^n)" using double_sinus \<theta>_def by auto
+    have "sin(2*\<theta>) = sqrt(2^n-1) * (2/2^n)" using double_sinus \<theta>_def by simp
     also have "... = sqrt(2^n-1) * 1/2^(n-1)" by simp
-    also have "... = ((2^n-1)/sqrt(2^n-1)) * 1/2^(n-1)" using aux_calculation_pow_2 sorry
+    also have "... = ((2^n-1)/sqrt(2^n-1)) * 1/2^(n-1)" using aux_calculation_pow_2 by simp
     finally show "complex_of_real ((2^n-1)/(2^(n-1)) * 1/sqrt(2^n-1)) = complex_of_real(sin(2*\<theta>))" 
       by (smt divide_divide_eq_left mult.commute)
   qed
@@ -538,7 +539,7 @@ lemma (in grover) aux_grover_it_cos_rep:
   fixes m
   defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
   shows "2/2^n*-(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
-       = complex_of_real (1/sqrt(2^n-1)*cos((2*real (Suc m)+1)*\<theta>))"
+       = complex_of_real (1/sqrt(2^n-1)*cos((2*real (Suc m)+1)*\<theta>))" 
 proof-    
   have "2/2^n*-(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
       = -2/2^n*(sin((2*real m+1)*\<theta>)) + (2^n-2)/2^n*(1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>))"
@@ -548,8 +549,8 @@ proof-
         diff_minus_eq_add diff_numeral_special(11) diff_zero dim eq_iff_diff_eq_0 le_minus_one_simps(1) le_minus_one_simps(3)
         power_increasing real_sqrt_eq_zero_cancel_iff semiring_normalization_rules(33)) 
   ultimately have "2/2^n * -(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
-      = 1/sqrt(2^n-1) * (sqrt(2^n-1) * -2/2^n * (sin((2*real m+1)*\<theta>))) + 1/sqrt(2^n-1) * (2^n-2)/2^n*(cos((2*real m+1)*\<theta>))"
-    using divide_self_if by auto
+      = 1/sqrt(2^n-1) * sqrt(2^n-1) * -2/2^n * (sin((2*real m+1)*\<theta>)) + (2^n-2)/2^n*(1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>))"
+    using \<open>sqrt (2 ^ n - 1) \<noteq> 0\<close> by auto 
   then have "2/2^n * -(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
       = 1/sqrt(2^n-1) * (sqrt(2^n-1) * -2/2^n * (sin((2*real m+1)*\<theta>))) + 1/sqrt(2^n-1) * ((2^n-2)/2^n * cos((2*real m+1)*\<theta>))"
     by auto
@@ -560,7 +561,8 @@ proof-
   then have "2/2^n * -(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
       = 1/sqrt(2^n-1) * ((sqrt(2^n-1) * -2/2^n) * (sin((2*real m+1)*\<theta>)) + ((2^n-2)/2^n) * cos((2*real m+1)*\<theta>))"
     by auto
-  moreover have "(sqrt(2^n-1) * -2/2^n) = -sin(2*\<theta>)" using double_sinus \<theta>_def by auto
+  moreover have "(sqrt(2^n-1) * -2/2^n) = -sin(2*\<theta>)" using double_sinus \<theta>_def 
+    by (metis divide_minus_left mult.commute mult_minus_right times_divide_eq_left)
   moreover have "((2^n-2)/2^n) = cos(2*\<theta>)" using double_cos \<theta>_def by auto
   ultimately have "2/2^n * -(complex_of_real (sin((2*real m+1)*\<theta>))) + (2^n-2)/2^n*(complex_of_real (1/sqrt(2^n-1)*cos((2*real m+1)*\<theta>)))
       = 1/sqrt(2^n-1) * (-sin(2*\<theta>) * (sin((2*real m+1)*\<theta>)) + cos(2*\<theta>) * cos((2*real m+1)*\<theta>))"
@@ -583,7 +585,8 @@ lemma (in grover) t2:
   defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
   shows "grover_iter m = (Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*m+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*m+1)*\<theta>)) )) \<Otimes> (H * |one\<rangle>)"
 proof(induction m)
-  have "grover_iter 0 = (\<psi>\<^sub>1\<^sub>0 n) \<Otimes> (H * |one\<rangle>)" sorry
+  have "grover_iter 0 = (\<psi>\<^sub>1\<^sub>0 n) \<Otimes> (H * |one\<rangle>)" 
+    using iter_tensor_of_H_on_zero_tensor[of n] dim by auto
   moreover have "(\<psi>\<^sub>1\<^sub>0 n) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*real 0+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*real 0+1)*\<theta>))))"
   proof
     fix i j::nat
