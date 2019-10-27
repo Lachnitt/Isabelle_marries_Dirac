@@ -995,12 +995,36 @@ proof-
 qed
  
 
+
+
+lemma (in grover) bound_temp:
+  assumes "n \<ge> 2"
+  shows "pi/4*sqrt(2)^n*(arcsin((1/(sqrt(2)^n)))) \<le> 1"
+proof(rule Nat.nat_induct_at_least)
+  show "n \<ge> 2" using assms by simp
+next
+  have "sqrt(2)^2 = 2" sorry
+  moreover have "arcsin((1/(sqrt(2)^2))) = arcsin(1/2)" sorry
+  moreover have "arcsin(1/2) = pi/6" sorry
+  moreover have "pi/4*2*pi/6 \<le> 1" sorry
+  ultimately show "pi/4*sqrt(2)^2*(arcsin((1/(sqrt(2)^2)))) \<le> 1" 
+    by (simp add: \<open>arcsin (1 / 2) = pi / 6\<close>)
+next
+  fix n 
+  assume IH: "pi/4*sqrt(2)^n*(arcsin((1/(sqrt(2)^n)))) \<le> 1"
+  have "pi/4*sqrt(2)^(Suc n)*(arcsin((1/(sqrt(2)^(Suc n))))) 
+      = pi/4*sqrt(2)^n * sqrt(2)*(arcsin((1/(sqrt(2)^(Suc n)))))" sorry
+  moreover have "(arcsin((1/(sqrt(2)^(Suc n))))) \<le> 1/sqrt(2)*(arcsin((1/(sqrt(2)^n))))" 
+    sorry
+    show "pi/4*sqrt(2)^(Suc n)*(arcsin((1/(sqrt(2)^(Suc n))))) \<le> 1" sorry
+qed
+
 (* We have a problem here since: "(cos((2*iterations+1)*\<theta>))\<^sup>2 \<le> (sin(\<theta>))\<^sup>2" 
 does not hold in general. (cos((2*iterations+1)*\<theta>)) does not has to be \<ge> 0 (see e.g. Wolfram alpha)
 and does -(cos((2*iterations+1)*\<theta>)) \<le> sin(\<theta>) really hold?
 I tried to proof above that abs (cos((2*iterations+1)*\<theta>)) \<le> abs (sin(\<theta>)) above (as it is done in the paper) 
 We could show that there is always a bigger n that satisfies that?*)
-
+(*Edit: the lemma above seems to hold true and might help with the problem *)
 lemma (in grover) prob_no_success:
   fixes \<theta> :: real
   defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
