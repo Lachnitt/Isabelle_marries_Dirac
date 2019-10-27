@@ -583,7 +583,7 @@ lemma (in grover) t2:
   defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
   shows "grover_iter m = (Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*m+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*m+1)*\<theta>)) )) \<Otimes> (H * |one\<rangle>)"
 proof(induction m)
-  have "grover_iter 0 = (\<psi>\<^sub>1\<^sub>0 n) \<Otimes> (H * |one\<rangle>)" by auto
+  have "grover_iter 0 = (\<psi>\<^sub>1\<^sub>0 n) \<Otimes> (H * |one\<rangle>)" sorry
   moreover have "(\<psi>\<^sub>1\<^sub>0 n) = (Matrix.mat (2^n) 1 (\<lambda>(i,j). complex_of_real (if i=x then sin((2*real 0+1)*\<theta>) else 1/sqrt(2^n-1)*cos((2*real 0+1)*\<theta>))))"
   proof
     fix i j::nat
@@ -696,12 +696,20 @@ lemma pi_div_4:
   using pi_bounds apply (simp add: ceiling_eq_iff) 
   using pi_less_4 pi_not_less_zero by linarith
 
-lemma pi_square_le:(*\<le> 12 would be enough already *)
+lemma pi_square_le:
   shows "pi * pi \<le> (10::real)" 
 proof- 
   have "pi \<le> 22/7" sorry
   moreover have "22/7*22/7 \<le> 10" sorry
   ultimately show ?thesis sorry
+qed
+
+lemma pi_half_square[simp]:
+  shows "pi/2 * pi/2 \<le> 2.5" 
+proof-
+  have "pi/2 * pi/2 = (pi * pi)/(2*2)" by simp
+  then have "pi/2 * pi/2 \<le> 10/4" using pi_square_le by auto
+  then show ?thesis by auto
 qed
 
 lemma limit_on_arcsin:
@@ -762,57 +770,19 @@ lemma mult_mono_times_2:
   shows "2*a*c \<le> 2*b*c"
   by (simp add: assms(1) assms(2) mult_right_mono)
 
-lemma aux_sqrt_2_n [simp]:
-  assumes "n \<ge> 2"
-  shows "1/sqrt(2)^n \<le> sin(1/2)" 
+lemma aux_sqrt_2_sin [simp]:
+  assumes "n \<ge> 4" (* 3 would be enough *)
+  shows "1/sqrt(2)^n \<le> sin(1/2)"  
   sorry
 
-lemma
-  fixes x::real
-  assumes "x> 0"
-  shows "1/x*x= 1" 
-  using assms by auto
 
-
-lemma t5[simp]:
-  shows "pi/2 * pi/2 \<le> 2.5" sorry
-
-
-lemma w1: 
-  assumes "n \<ge> 2" 
-  shows "1/arcsin(1/sqrt(2)^n) \<le> sqrt(2)^n" 
-proof(rule Nat.nat_induct_at_least)
-  show "n \<ge> 2" using assms by auto
-next
-  have "arcsin(1/sqrt(2)^2) = arcsin(1/2)" by simp
-  moreover have "arcsin(1/2) = pi/6" 
-  proof-
-    have "arcsin(sin(pi/6)) = pi/6" using arcsin_sin[of "pi/6"] by simp
-    moreover have "sin(pi/6) = 1/2" by (simp add: sin_30)
-    ultimately show ?thesis using arcsin_eq_iff by auto
-  qed
-  ultimately have "arcsin(1/sqrt(2)^2) = pi/6" by simp
-  then have "1/arcsin(1/sqrt(2)^2) = 6/pi" 
-    by (metis divide_divide_eq_right mult.right_neutral mult_numeral_1)
-  moreover have "6*1/pi \<le> 6*1/3" 
-    by (metis div_by_1 divide_divide_eq_right frac_le order_le_less pi_bounds(1) zero_le_numeral zero_less_numeral)
-  ultimately have "1/arcsin(1/sqrt(2)^2) \<le> 2" by auto
-  then show "1/arcsin(1/sqrt(2)^2) \<le> sqrt(2)^2" by auto 
-next
-  fix n
-  assume IH: "1/arcsin(1/sqrt(2)^n) \<le> sqrt(2)^n" 
-  show "1/arcsin(1/sqrt(2)^(Suc n)) \<le> sqrt(2)^(Suc n)" 
-    sorry
-qed
-
- 
 
 (*In the paper it just says \<theta> \<approx> sin(\<theta>) = 1/sqrt(2)^n. I tried to find a bound for the difference *)
 lemma (in grover) aux_prob_no_success:
   fixes \<theta>::real
   defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
-  assumes "n\<ge>2"
-  shows "abs (cos((2*iterations+1)*\<theta>)) \<le> sin(\<theta>)"
+  assumes "n \<ge> 4"
+  shows "(cos((2*iterations+1)*\<theta>)) \<le> sin(\<theta>)"
 proof-
   define it where "it \<equiv> pi/4*1/\<theta>"
   have f0: "\<theta> \<le> pi/2 \<and> \<theta> \<ge> -pi/2"
@@ -828,11 +798,23 @@ proof-
   have f2: "\<theta> \<le> 1/2"
   proof-
     have "arcsin (sin ((1::real)/2)) = 1/2" using arcsin_sin pi_ge_two by auto
-    moreover have "1/sqrt(2)^n \<le> (sin (1/2))" using aux_sqrt_2_n assms by auto
+    moreover have "1/sqrt(2)^n \<le> (sin (1/2))" using aux_sqrt_2_sin[of n] assms by auto
     ultimately show ?thesis using \<theta>_def arcsin_le_mono[of "1/sqrt(2)^n" "sin (1/2)"] by auto
   qed
-  
-  have f3: "abs (-\<lfloor>it\<rfloor>+(pi-2*\<theta>)/4*1/\<theta>) \<le> 1/2" 
+
+  have f3: "1/\<theta> \<le> sqrt(2)^n"
+  proof-
+    have "\<theta> \<ge> sin(\<theta>)" using f1 by (simp add: sin_x_le_x)
+    then have "1 \<ge> sin(\<theta>)*1/\<theta>" by (simp add: f1)
+    moreover have "sin(\<theta>) = 1/sqrt(2)^n" 
+      by (smt \<theta>_def divide_le_eq_1_pos one_le_power real_sqrt_ge_1_iff sin_arcsin zero_le_divide_1_iff)
+    ultimately have "1 \<ge> 1/sqrt(2)^n * 1/\<theta>" by simp
+    then show ?thesis 
+      by (metis divide_divide_eq_left divide_le_eq_1_pos mult.left_neutral real_sqrt_gt_0_iff rel_simps(51) 
+          semiring_normalization_rules(7) zero_less_power) 
+  qed
+ 
+  have f4: "abs (-\<lfloor>it\<rfloor>+(pi-2*\<theta>)/4*1/\<theta>) \<le> 1/2"
   proof-
     have "-\<lfloor>it\<rfloor>+(pi-2*\<theta>)/4*1/\<theta> \<le> 1/2"
     proof-
@@ -855,14 +837,15 @@ proof-
     ultimately show ?thesis by linarith
   qed
 
- 
+
+(*abs part may be deleted if not needed anymore, i.e. just keep (cos((2*\<lfloor>it\<rfloor>+1)*\<theta>)) \<le> (sin(\<theta>))  *)
   have "abs (cos((2*\<lfloor>it\<rfloor>+1)*\<theta>)) \<le> (sin(\<theta>))"
   proof-
     have "abs ((2*\<lfloor>it\<rfloor>+1)*\<theta> - (2*(pi-2*\<theta>)/4*1/\<theta>+1)*\<theta>) \<le> \<theta>"  
     proof-
       have "(2*\<lfloor>it\<rfloor>+1)*\<theta> - (2*(pi-2*\<theta>)/4*1/\<theta>+1)*\<theta> \<le> \<theta>"
       proof-
-        have "\<lfloor>it\<rfloor> \<le> 1/2+(pi-2*\<theta>)/4*1/\<theta>" using f3 by linarith
+        have "\<lfloor>it\<rfloor> \<le> 1/2+(pi-2*\<theta>)/4*1/\<theta>" using f4 by linarith
         then have "2*\<lfloor>it\<rfloor>*\<theta> \<le> 2*(1/2+(pi-2*\<theta>)/4*1/\<theta>)*\<theta>" 
           using mult_mono_times_2[of "\<lfloor>it\<rfloor>" "1/2+(pi-2*\<theta>)/4*1/\<theta>" \<theta>] f1 f2 by auto
         moreover have "(2*\<lfloor>it\<rfloor>+1)*\<theta> = 2*\<lfloor>it\<rfloor>*\<theta> + \<theta>" 
@@ -881,7 +864,7 @@ proof-
       qed
       moreover have "-(2*\<lfloor>it\<rfloor>+1)*\<theta> + (2*(pi-2*\<theta>)/4*1/\<theta>+1)*\<theta> \<le> \<theta>" 
       proof-
-        have "-\<lfloor>it\<rfloor> \<le> 1/2 - (pi-2*\<theta>)/4*1/\<theta>" using f3 by linarith
+        have "-\<lfloor>it\<rfloor> \<le> 1/2 - (pi-2*\<theta>)/4*1/\<theta>" using f4 by linarith
         then have "2*-\<lfloor>it\<rfloor>*\<theta> \<le> 2*(1/2 - (pi-2*\<theta>)/4*1/\<theta>)*\<theta>" 
           using mult_mono_times_2[of "-\<lfloor>it\<rfloor>" "1/2-(pi-2*\<theta>)/4*1/\<theta>" \<theta>] f1 f2 by simp
         moreover have "-(2*\<lfloor>it\<rfloor>+1)*\<theta> = -2*\<lfloor>it\<rfloor>*\<theta> - \<theta>" 
@@ -907,123 +890,118 @@ proof-
       finally show "(2*(pi-2*\<theta>)/4*1/\<theta>+1)*\<theta> = pi/2" by auto
     qed
     ultimately have f4: "abs ((2*\<lfloor>it\<rfloor>+1)*\<theta> - pi/2) \<le> \<theta>" by linarith
-    have "- (pi / 2) \<le> real_of_int (-(2 * \<lfloor>it\<rfloor> + 1)) * \<theta> + pi / 2" using f0 f4 by linarith
-    moreover have "real_of_int (-(2 * \<lfloor>it\<rfloor> + 1)) * \<theta> + pi / 2 \<le> pi / 2"  
-      by (smt divide_nonneg_nonneg f1 it_def mult_minus_left mult_nonneg_nonneg of_int_le_0_iff pi_ge_zero zero_le_floor)
-    moreover have "- (pi / 2) \<le> -\<theta>" and "-\<theta> \<le> pi / 2" 
-      using f0 pi_half_ge_zero f2 by auto
-    moreover have "(real_of_int (- ((2::int) * \<lfloor>it\<rfloor> + (1::int))) * \<theta> + pi / (2::real) \<le> \<theta>)" using f4 by linarith
-    ultimately have "sin(-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2) \<le> sin(\<theta>)"
-      using sin_mono_le_eq[of "-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2" "\<theta>"] by auto
-    moreover have "sin(-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2) = sin(pi/2-(2*\<lfloor>it\<rfloor>+1)*\<theta>)" 
-      by (metis (no_types, hide_lams) add.commute arcsin_1 floor_numeral floor_uminus_of_int minus_real_def mult.commute mult_2_right mult_minus_right of_int_hom.hom_uminus)
-    moreover have "sin(pi/2-(2*\<lfloor>it\<rfloor>+1)*\<theta>) = cos((2*\<lfloor>it\<rfloor>+1)*\<theta>)" 
-      using cos_sin_eq[of "(2*\<lfloor>it\<rfloor>+1)*\<theta>"] by auto
-    ultimately have r1: "cos((2*\<lfloor>it\<rfloor>+1)*\<theta>) \<le> (sin(\<theta>))" by linarith
-
-    have "- (pi / (2::real)) \<le> real_of_int ((2::int) * \<lfloor>it::real\<rfloor> + (1::int)) * (\<theta>::real) - pi / (2::real)" 
-      using \<open>- (pi / (2::real)) \<le> - (\<theta>::real)\<close> f4 by linarith
-    moreover have "real_of_int ((2::int) * \<lfloor>it\<rfloor> + (1::int)) * \<theta> - pi / (2::real) \<le> pi / (2::real)" 
-      using \<open>- (pi / (2::real)) \<le> - (\<theta>::real)\<close> f4 by auto
-    ultimately have "sin((2*\<lfloor>it\<rfloor>+1)*\<theta>-pi/2) \<le> sin(\<theta>)"
-      using sin_mono_le_eq[of "(2*\<lfloor>it\<rfloor>+1)*\<theta>-pi/2" "\<theta>"] f4 f0 by auto
-    then have "sin(-(-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2)) \<le> sin(\<theta>)" 
-      by (smt \<open>sin (real_of_int (- ((2::int) * \<lfloor>it::real\<rfloor> + (1::int))) * (\<theta>::real) + pi / (2::real)) = sin (pi / (2::real) - real_of_int ((2::int) * \<lfloor>it\<rfloor> + (1::int)) * \<theta>)\<close> sin_minus)
-    then have "-sin((-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2)) \<le> sin(\<theta>)" 
-      by (metis sin_minus)
-    moreover have "-sin(-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2) = -sin(pi/2-(2*\<lfloor>it\<rfloor>+1)*\<theta>)" 
-      by (metis (no_types, hide_lams) add.commute arcsin_1 floor_numeral floor_uminus_of_int minus_real_def mult.commute mult_2_right mult_minus_right of_int_hom.hom_uminus)
-    moreover have "-sin(pi/2-(2*\<lfloor>it\<rfloor>+1)*\<theta>) = -cos((2*\<lfloor>it\<rfloor>+1)*\<theta>)" 
-      using cos_sin_eq[of "(2*\<lfloor>it\<rfloor>+1)*\<theta>"] by auto
-    ultimately have r2: "-cos((2*\<lfloor>it\<rfloor>+1)*\<theta>) \<le> (sin(\<theta>))" by linarith
-
-    show ?thesis using r1 r2 by auto
-  qed
-  moreover have "abs (cos((2*iterations+1)*\<theta>)) \<le> abs (cos((2*\<lfloor>it\<rfloor>+1)*\<theta>))" 
-  proof-
-    have r1: "cos ((2*iterations+1)*\<theta>) \<le> cos ((2*\<lfloor>it\<rfloor>+1)*\<theta>)"  
+    
+    have "cos((2*\<lfloor>it\<rfloor>+1)*\<theta>) \<le> (sin(\<theta>))" 
     proof-
-      have h1: "sqrt(2)^n*\<theta> \<le> pi" sorry
-  
-      have "1/arcsin(1/sqrt(2)^n) \<le> sqrt(2)^n" using w1 assms by auto
-      then have t4: "1/\<theta> \<le> sqrt(2)^n" using \<theta>_def by blast
-      moreover have "0 \<le> 1/\<theta>" using f1 by auto
-      ultimately have "pi/4*1/\<theta> \<le> pi/4*sqrt(2)^n" using mult_mono[of "pi/4" "pi/4" "1/\<theta>" "sqrt(2)^n"] by auto
-      then have "\<lfloor>pi/4*1/\<theta>\<rfloor> \<le> \<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>" using floor_mono by blast
-      then have "\<lfloor>it\<rfloor> \<le> iterations" 
-        using it_def iterations_def iterations_nat real_sqrt_power by auto
-      then have "2*\<lfloor>it\<rfloor> \<le> 2*iterations" by auto
-      then have "2*\<lfloor>it\<rfloor>+1 \<le> 2*iterations+1" by auto
-      then have "(2*\<lfloor>it\<rfloor>+1)*\<theta> \<le> (2*iterations+1)*\<theta>" using f1 by simp
-  
-      moreover have "(2*iterations+1)*\<theta> \<le> pi" 
-      proof-
-        have "(2*iterations+1)*\<theta> = 2*iterations*\<theta>+\<theta>" 
-          by (simp add: semiring_normalization_rules(2))
-        then have "(2*iterations+1)*\<theta> \<le> 2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta>+\<theta>" 
-          by (smt iterations_def iterations_nat mult.left_neutral of_int_of_nat_eq of_nat_add one_add_one semiring_normalization_rules(2))
-        moreover have "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta>+\<theta> \<le> pi" 
-        proof-
-          have "\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor> \<le> pi/4 * sqrt(2)^n" 
-            using of_int_floor_le by blast
-          then have "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor> \<le> pi/2 * sqrt(2)^n" by simp
-          then have "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta> \<le> pi/2 * sqrt(2)^n*\<theta>" using f1 real_mult_le_cancel_iff1 by blast
-          then have "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta> \<le> pi/2 * pi/2" using h1 sorry
-          then have "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta> + \<theta> \<le> pi/2 * pi/2 + 1/2" using f2 by auto
-          then have "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta> + \<theta> \<le> 2.5 + 1/2" using t5 by linarith
-          then show "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta> + \<theta> \<le> pi" using pi_bounds(1) by linarith
-        qed
-        ultimately show "(2*iterations+1)*\<theta> \<le> pi" by linarith
-      qed
-      moreover have "(2*\<lfloor>it\<rfloor>+1)*\<theta> \<ge> 0"
-      proof-
-        have "pi/4 \<ge> 0" by auto
-        moreover have "1/\<theta> \<ge> 0" using \<open>(0::real) \<le> (1::real) / (\<theta>::real)\<close> by blast
-        ultimately have "\<lfloor>pi/4*1/\<theta>\<rfloor> \<ge> \<lfloor>pi/4\<rfloor>*\<lfloor>1/\<theta>\<rfloor>" by (metis le_mult_floor times_divide_eq_right)
-        then have  "\<lfloor>pi/4*1/\<theta>\<rfloor> \<ge> 0*\<lfloor>1/\<theta>\<rfloor>" by (simp add: pi_div_4(2))
-        then have "\<lfloor>pi/4*1/\<theta>\<rfloor>*\<theta> \<ge> 0" using \<open>(0::real) \<le> (1::real) / (\<theta>::real)\<close> by auto
-        then have "2*\<lfloor>pi/4*1/\<theta>\<rfloor>*\<theta> \<ge> 0" using \<open>(0::real) \<le> (1::real) / (\<theta>::real)\<close> by auto
-        then have "2*\<lfloor>pi/4*1/\<theta>\<rfloor>*\<theta>+\<theta> \<ge> 0" using \<open>(0::real) \<le> (1::real) / (\<theta>::real)\<close> by auto
-        then show ?thesis using \<open>(0::real) \<le> (1::real) / (\<theta>::real)\<close> it_def by auto 
-      qed
-      moreover have  "(2*iterations+1)*\<theta> \<ge> 0"
-      proof-
-        have "pi/4 \<ge> 0" by auto
-        moreover have "sqrt(2)^n \<ge> 0" by simp
-        ultimately have "\<lfloor>pi/4*sqrt(2)^n\<rfloor> \<ge> \<lfloor>pi/4\<rfloor>*\<lfloor>sqrt(2)^n\<rfloor>" by (metis le_mult_floor)
-        then have "\<lfloor>pi/4*sqrt(2)^n\<rfloor> \<ge> 0*\<lfloor>sqrt(2)^n\<rfloor>" by simp
-        then have "\<lfloor>pi/4*sqrt(2)^n\<rfloor> \<ge> 0" by simp
-        then have "2*\<lfloor>pi/4*sqrt(2)^n\<rfloor> \<ge> 0" by simp
-        then have "2*\<lfloor>pi/4*sqrt(2)^n\<rfloor>*\<theta> \<ge> 0" using f1 by auto
-        then have "2*\<lfloor>pi/4*sqrt(2)^n\<rfloor>*\<theta>+\<theta> \<ge> 0" using f1 by auto
-        moreover have "2*\<lfloor>pi/4*sqrt(2)^n\<rfloor>*\<theta>+\<theta> = (2*\<lfloor>pi/4*sqrt(2)^n\<rfloor>+1)*\<theta>" by (simp add: semiring_normalization_rules(2))
-        ultimately show ?thesis 
-          using \<open>(0::real) \<le> real_of_int ((2::int) * \<lfloor>it::real\<rfloor> + (1::int)) * (\<theta>::real)\<close> \<open>real_of_int ((2::int) * \<lfloor>it::real\<rfloor> + (1::int)) * (\<theta>::real) \<le> real ((2::nat) * iterations + (1::nat)) * \<theta>\<close> by linarith 
-      qed
-      ultimately show "cos ((2*\<lfloor>it\<rfloor>+1)*\<theta>) \<ge> cos ((2*iterations+1)*\<theta>)"  
-        using cos_mono_le_eq[of "(2*iterations+1)*\<theta>" "(2*\<lfloor>it\<rfloor>+1)*\<theta>"] by auto
+      have "- (pi / 2) \<le> real_of_int (-(2 * \<lfloor>it\<rfloor> + 1)) * \<theta> + pi / 2" using f0 f4 by linarith
+      moreover have "real_of_int (-(2 * \<lfloor>it\<rfloor> + 1)) * \<theta> + pi / 2 \<le> pi / 2"  
+        by (smt divide_nonneg_nonneg f1 it_def mult_minus_left mult_nonneg_nonneg of_int_le_0_iff pi_ge_zero zero_le_floor)
+      moreover have "- (pi / 2) \<le> -\<theta>" and "-\<theta> \<le> pi / 2" 
+        using f0 pi_half_ge_zero f2 by auto
+      moreover have "(real_of_int (- ((2::int) * \<lfloor>it\<rfloor> + (1::int))) * \<theta> + pi / (2::real) \<le> \<theta>)" using f4 by linarith
+      ultimately have "sin(-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2) \<le> sin(\<theta>)"
+        using sin_mono_le_eq[of "-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2" "\<theta>"] by auto
+      moreover have "sin(-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2) = sin(pi/2-(2*\<lfloor>it\<rfloor>+1)*\<theta>)" 
+        by (metis (no_types, hide_lams) add.commute arcsin_1 minus_real_def mult.commute mult_minus_right of_int_hom.hom_uminus)
+      moreover have "sin(pi/2-(2*\<lfloor>it\<rfloor>+1)*\<theta>) = cos((2*\<lfloor>it\<rfloor>+1)*\<theta>)" 
+        using cos_sin_eq[of "(2*\<lfloor>it\<rfloor>+1)*\<theta>"] by auto
+      ultimately show ?thesis by simp
     qed
-    moreover have r2: "-cos ((2*iterations+1)*\<theta>) \<le> cos ((2*\<lfloor>it\<rfloor>+1)*\<theta>)"   
-(*I am not sure if this holds, might be nicer to delete the abs everywhere and to prove that cos ((2*iterations+1)*\<theta>) \<ge> 0 
-But this is kind of the way they do it in the paper.*)
- (*This is just needed to show  "(cos((2*iterations+1)*\<theta>))\<^sup>2 \<le> (sin(\<theta>))\<^sup>2" 
-in the next proof *)
-     show ?thesis sorry
+    moreover have "-cos((2*\<lfloor>it\<rfloor>+1)*\<theta>) \<le> (sin(\<theta>))" 
+    proof-
+      have "- pi/2 \<le> real_of_int (2*\<lfloor>it\<rfloor>+1)*\<theta>-pi/2" 
+        using f0 f4 by linarith
+      moreover have "real_of_int (2*\<lfloor>it\<rfloor>+1)*\<theta>-pi/2 \<le> pi/2" 
+        using f0 f4 by auto
+      ultimately have "sin((2*\<lfloor>it\<rfloor>+1)*\<theta>-pi/2) \<le> sin(\<theta>)"
+        using sin_mono_le_eq[of "(2*\<lfloor>it\<rfloor>+1)*\<theta>-pi/2" "\<theta>"] f4 f0 by simp
+      moreover have "-(-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2) = (2*\<lfloor>it\<rfloor>+1)*\<theta>-pi/2" by linarith
+      ultimately have "sin(-(-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2)) \<le> sin(\<theta>)" by simp
+      then have "-sin((-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2)) \<le> sin(\<theta>)" 
+        by (metis sin_minus)
+      moreover have "-sin(-(2*\<lfloor>it\<rfloor>+1)*\<theta>+pi/2) = -sin(pi/2-(2*\<lfloor>it\<rfloor>+1)*\<theta>)" 
+        by (metis (no_types, hide_lams) add.commute arcsin_1 minus_real_def mult.commute mult_2_right mult_minus_right of_int_hom.hom_uminus)
+      moreover have "-sin(pi/2-(2*\<lfloor>it\<rfloor>+1)*\<theta>) = -cos((2*\<lfloor>it\<rfloor>+1)*\<theta>)" 
+        using cos_sin_eq[of "(2*\<lfloor>it\<rfloor>+1)*\<theta>"] by auto
+      ultimately have "-cos((2*\<lfloor>it\<rfloor>+1)*\<theta>) \<le> (sin(\<theta>))" by linarith
+      then show ?thesis by linarith
     qed
     ultimately show ?thesis by auto
   qed
-  ultimately show "abs (cos((2*iterations+1)*\<theta>)) \<le> sin(\<theta>)" by simp
+  moreover have "(cos((2*iterations+1)*\<theta>)) \<le> (cos((2*\<lfloor>it\<rfloor>+1)*\<theta>))" 
+  proof-
+    have h1: "sqrt(2)^n*\<theta> \<le> pi" sorry
+
+    have "(2*\<lfloor>it\<rfloor>+1)*\<theta> \<le> (2*iterations+1)*\<theta>" 
+    proof-
+      have "0 \<le> 1/\<theta>" using f1 by auto
+      then have "pi/4*1/\<theta> \<le> pi/4*sqrt(2)^n" using mult_mono[of "pi/4" "pi/4" "1/\<theta>" "sqrt(2)^n"] f3 by auto
+      then have "\<lfloor>pi/4*1/\<theta>\<rfloor> \<le> \<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>" using floor_mono by blast
+      then have "\<lfloor>it\<rfloor> \<le> iterations"
+        using it_def iterations_def iterations_nat real_sqrt_power by auto
+      then show ?thesis using f1 by simp
+    qed
+    moreover have "(2*iterations+1)*\<theta> \<le> pi" 
+    proof-
+      have "(2*iterations+1)*\<theta> = 2*iterations*\<theta>+\<theta>" 
+        by (simp add: semiring_normalization_rules(2))
+      then have "(2*iterations+1)*\<theta> \<le> 2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta>+\<theta>" 
+        by (smt iterations_def iterations_nat mult.left_neutral of_int_of_nat_eq of_nat_add one_add_one semiring_normalization_rules(2))
+      moreover have "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta>+\<theta> \<le> pi" 
+      proof-
+        have "\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor> \<le> pi/4 * sqrt(2)^n" 
+          using of_int_floor_le by blast
+        then have "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor> \<le> pi/2 * sqrt(2)^n" by simp
+        then have "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta> \<le> pi/2 * sqrt(2)^n*\<theta>" using f1 real_mult_le_cancel_iff1 by blast
+        then have "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta> \<le> pi/2 * pi/2" using h1 sorry
+        then have "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta> + \<theta> \<le> pi/2 * pi/2 + 1/2" using f2 by auto
+        then have "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta> + \<theta> \<le> 2.5 + 1/2" using pi_half_square by auto
+        then show "2*\<lfloor>(pi/4 * sqrt(2)^n)\<rfloor>*\<theta> + \<theta> \<le> pi" using pi_bounds(1) by linarith
+      qed
+      ultimately show "(2*iterations+1)*\<theta> \<le> pi" by linarith
+    qed
+    moreover have "(2*\<lfloor>it\<rfloor>+1)*\<theta> \<ge> 0"
+    proof-
+      have "pi/4 \<ge> 0" by simp
+      moreover have "1/\<theta> \<ge> 0" using f0 f1 by simp
+      ultimately have "\<lfloor>pi/4*1/\<theta>\<rfloor> \<ge> \<lfloor>pi/4\<rfloor>*\<lfloor>1/\<theta>\<rfloor>" by (metis le_mult_floor times_divide_eq_right)
+      then have  "\<lfloor>pi/4*1/\<theta>\<rfloor> \<ge> 0*\<lfloor>1/\<theta>\<rfloor>" by (simp add: pi_div_4(2))
+      then have "\<lfloor>pi/4*1/\<theta>\<rfloor>*\<theta> \<ge> 0" using \<open>(0::real) \<le> (1::real) / (\<theta>::real)\<close> by auto
+      then have "2*\<lfloor>pi/4*1/\<theta>\<rfloor>*\<theta> \<ge> 0" using \<open>(0::real) \<le> (1::real) / (\<theta>::real)\<close> by auto
+      then have "2*\<lfloor>pi/4*1/\<theta>\<rfloor>*\<theta>+\<theta> \<ge> 0" using \<open>(0::real) \<le> (1::real) / (\<theta>::real)\<close> by auto
+      then show ?thesis using \<open>(0::real) \<le> (1::real) / (\<theta>::real)\<close> it_def by auto 
+    qed
+    moreover have "(2*iterations+1)*\<theta> \<ge> 0"
+    proof-
+      have "pi/4 \<ge> 0" by auto
+      moreover have "sqrt(2)^n \<ge> 0" by simp
+      ultimately have "\<lfloor>pi/4*sqrt(2)^n\<rfloor> \<ge> \<lfloor>pi/4\<rfloor>*\<lfloor>sqrt(2)^n\<rfloor>" by (metis le_mult_floor)
+      then have "\<lfloor>pi/4*sqrt(2)^n\<rfloor> \<ge> 0*\<lfloor>sqrt(2)^n\<rfloor>" by simp
+      then have "2*\<lfloor>pi/4*sqrt(2)^n\<rfloor>*\<theta>+\<theta> \<ge> 0" using f1 by simp
+      then have "2*iterations*\<theta>+\<theta> \<ge> 0" using f1 by auto
+      moreover have "2*iterations*\<theta>+\<theta> = (2*iterations+1)*\<theta>" by (simp add: semiring_normalization_rules(2))
+      ultimately show ?thesis by simp
+    qed
+    ultimately show "cos ((2*\<lfloor>it\<rfloor>+1)*\<theta>) \<ge> cos ((2*iterations+1)*\<theta>)"  
+      using cos_mono_le_eq[of "(2*iterations+1)*\<theta>" "(2*\<lfloor>it\<rfloor>+1)*\<theta>"] by auto
+  qed
+  ultimately show ?thesis by auto
 qed
+ 
 
-
+(* We have a problem here since: "(cos((2*iterations+1)*\<theta>))\<^sup>2 \<le> (sin(\<theta>))\<^sup>2" 
+does not hold in general. (cos((2*iterations+1)*\<theta>)) does not has to be \<ge> 0 (see e.g. Wolfram alpha)
+and does -(cos((2*iterations+1)*\<theta>)) \<le> sin(\<theta>) really hold?
+We could show that there is always a bigger n that satisfies that?*)
 
 lemma (in grover) prob_no_success:
+  fixes \<theta> :: real
   defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
-  assumes "n\<ge>2"
+  assumes "n \<ge> 4" and "(cos((2*iterations+1)*\<theta>)) \<ge> 0" 
   shows "(2^n-1) * (cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2 \<le> 1/2^n"
 proof- 
-  have "abs (cos((2*iterations+1)*\<theta>)) \<le> sin(\<theta>)" using aux_prob_no_success assms by auto
-  then  have f7: "(cos((2*iterations+1)*\<theta>))\<^sup>2 \<le> (sin(\<theta>))\<^sup>2" sorry
+  have "(cos((2*iterations+1)*\<theta>)) \<le> sin(\<theta>)" using aux_prob_no_success assms by auto
+  then have f7: "(cos((2*iterations+1)*\<theta>))\<^sup>2 \<le> (sin(\<theta>))\<^sup>2" using assms power_mono by blast
   have f8: "Im (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)) = 0"
   proof-
     have "Im (1/sqrt(2^n-1)*cos((2*iterations+1)*\<theta>)) = Re (1/sqrt(2^n-1)) * Im (cos((2*iterations+1)*\<theta>)) + Im (1/sqrt(2^n-1)) * Re (cos((2*iterations+1)*\<theta>))"
@@ -1044,36 +1022,39 @@ proof-
     by auto
   then have "(cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2 = 1/(2^n-1) * (cos((2*iterations+1)*\<theta>))\<^sup>2" 
     by (smt \<open>((1::real) / sqrt ((2::real) ^ (n::nat) - (1::real)))\<^sup>2 = (1::real) / ((2::real) ^ n - (1::real))\<close> \<open>complex_of_real ((cmod (complex_of_real ((1::real) / sqrt ((2::real) ^ (n::nat) - (1::real))) * cos (of_nat ((2::nat) * iterations + (1::nat)) * complex_of_real (\<theta>::real))))\<^sup>2) = complex_of_real (((1::real) / sqrt ((2::real) ^ n - (1::real)))\<^sup>2) * (cos (of_nat ((2::nat) * iterations + (1::nat)) * complex_of_real \<theta>))\<^sup>2\<close> cos_of_real of_real_eq_iff of_real_mult of_real_of_nat_eq of_real_power)
-  then have "(cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2  \<le> 1/(2^n-1) * (sin(\<theta>))\<^sup>2"
+  then have "(cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2 \<le> 1/(2^n-1) * (sin(\<theta>))\<^sup>2"
     using f7 mult_left_mono[of "(cos((2*iterations+1)*\<theta>))\<^sup>2" "(sin(\<theta>))\<^sup>2" "1/(2^n-1)"] by auto
-  then have "(cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2  \<le> 1/(2^n-1) * (1/sqrt(2)^n)\<^sup>2"
+  then have "(cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2 \<le> 1/(2^n-1) * (1/sqrt(2)^n)\<^sup>2"
     using \<theta>_def sin_arcsin by (smt divide_le_eq_1_pos one_le_power real_sqrt_ge_1_iff zero_le_divide_1_iff)
-  then have "(cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2  \<le> 1/(2^n-1) * 1/2^n"
+  then have "(cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2 \<le> 1/(2^n-1) * 1/2^n"
    by simp
-  then have "(2^n-1) * (cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2  \<le> (2^n-1) * (1/(2^n-1) * 1/2^n)" 
+  then have "(2^n-1) * (cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2 \<le> (2^n-1) * (1/(2^n-1) * 1/2^n)" 
     by (smt mult_left_mono one_le_power)
-  then have "(2^n-1) * (cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2  \<le> ((2^n-1) * 1/(2^n-1)) * 1/2^n" 
+  then have "(2^n-1) * (cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2 \<le> ((2^n-1) * 1/(2^n-1)) * 1/2^n" 
     by auto
-  moreover have "((2::real)^n-1) * 1/(2^n-1) = 1" sorry (*Why is this false? *)
-  ultimately show "(2^n-1) * (cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2  \<le> 1/2^n" by auto
+  moreover have "((2::real)^n-1) * 1/(2^n-1) = 1" 
+    by (smt aux_calculation_pow_2(2) diff_le_self div_by_1 divide_self one_le_power power_increasing)
+  ultimately show "(2^n-1) * (cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2 \<le> 1/2^n" by auto
 qed
 
 
 
 
-
-lemma(in grover) prob_success:
+(*There are several possibilities to solve that we don't want grover_algo $$ (x,0) here but only the first n qubits. *)
+lemma (in grover) prob_success:
+  fixes \<theta> :: real
   defines "\<theta> \<equiv> (arcsin((1/(sqrt(2)^n))))"
-  assumes "n \<ge> 2"
-  shows "1 - (2^n-1) * (cmod ((grover_algo iterations) $$ (x,0)))\<^sup>2 \<ge> (2^n-1)/2^n"
+  assumes "n \<ge> 4" and "(cos((2*iterations+1)*\<theta>)) \<ge> 0" 
+  shows "1 - (2^n-1) * (cmod (grover_algo $$ (x,0)))\<^sup>2 \<ge> (2^n-1)/2^n"
 proof-
+  have "grover_algo $$ (x,0) = 1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)" sorry
   have "1 - (2^n-1) * (cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2 \<ge> 1 - 1/2^n"
     using prob_no_success assms by auto
   then have "1 - (2^n-1) * (cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2 \<ge> 2^n/2^n - 1/2^n"
     by auto
   then have "1 - (2^n-1) * (cmod (1/sqrt(2^n-1)*cos((2*iterations+1)*complex_of_real \<theta>)))\<^sup>2 \<ge> (2^n-1)/2^n"
-    by (simp add: diff_divide_distrib) 
-  then show ?thesis using grover_algo_def by auto
+    by (simp add: diff_divide_distrib)
+  then show ?thesis using grover_algo_def sorry
 qed
 
 
