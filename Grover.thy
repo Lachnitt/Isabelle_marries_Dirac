@@ -776,7 +776,9 @@ lemma aux_sqrt_2_sin [simp]:
   sorry
 
 
-
+(* I followed the proof here:  https://arxiv.org/pdf/quant-ph/9605034.pdf
+To prove that "abs (cos((2*\<lfloor>it\<rfloor>+1)*\<theta>)) \<le> (sin(\<theta>))" was fine but its hard to prove that 
+"abs (cos((2*iterations+1)*\<theta>)) \<le> (sin(\<theta>))" *)
 (*In the paper it just says \<theta> \<approx> sin(\<theta>) = 1/sqrt(2)^n. I tried to find a bound for the difference *)
 lemma (in grover) aux_prob_no_success:
   fixes \<theta>::real
@@ -992,6 +994,7 @@ qed
 (* We have a problem here since: "(cos((2*iterations+1)*\<theta>))\<^sup>2 \<le> (sin(\<theta>))\<^sup>2" 
 does not hold in general. (cos((2*iterations+1)*\<theta>)) does not has to be \<ge> 0 (see e.g. Wolfram alpha)
 and does -(cos((2*iterations+1)*\<theta>)) \<le> sin(\<theta>) really hold?
+I tried to proof above that abs (cos((2*iterations+1)*\<theta>)) \<le> abs (sin(\<theta>)) above (as it is done in the paper) 
 We could show that there is always a bigger n that satisfies that?*)
 
 lemma (in grover) prob_no_success:
