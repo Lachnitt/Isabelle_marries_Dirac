@@ -1451,56 +1451,56 @@ proof-
 qed
 
 lemma app_CR_tensor_Id:
-  assumes "k ≥ 2" and "m ≥ 1" and "k ≤ m" and "c ≥ 1" and "c ≤ k - 1" and "c ≤ m" 
+  assumes "k ≥ 2" and "n ≥ 1" and "k ≤ n" and "c ≥ 1" and "c ≤ k - 1" and "c ≤ n" 
       and "dim_row v = 2" and "dim_col v = 1" 
       and "v = |zero⟩ ∨ v = |one⟩"
-      and "v = |zero⟩ ⟶ ((bin_rep m j)!(k-1)) = 0"
-      and "v = |one⟩ ⟶  ((bin_rep m j)!(k-1)) = 1" 
+      and "v = |zero⟩ ⟶ ((bin_rep n j)!(k-1)) = 0"
+      and "v = |one⟩ ⟶  ((bin_rep n j)!(k-1)) = 1" 
       and "(∀x ∈ set xs. dim_row x = 2)" and "(∀y ∈ set ys. dim_row y = 2)"
       and "(∀x ∈ set xs. dim_col x = 1)" and "(∀y ∈ set ys. dim_col y = 1)" 
-      and "length xs = k - c - 1" and "length ys = m - k"
-   shows "(CR (k-c+1) ⨂ Id (m-c-1)) * ((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) 
-        = (psq c k m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))" 
+      and "length xs = k - c - 1" and "length ys = n - k"
+   shows "(CR (k-c+1) ⨂ Id (n-c-1)) * ((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) 
+        = (psq c k n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))" 
 proof-
-  have "(CR (k-c+1) ⨂ Id (m-c-1)) * ((psq c (k-1) m j) ⨂ v ⨂ ((pr xs (k-c-1)) ⨂ (pr ys (m-k)))) = 
-        (CR (k-c+1) * ((psq c (k-1) m j) ⨂ v)) ⨂ (Id (m-c-1) * ((pr xs (k-c-1)) ⨂ (pr ys (m-k))))" 
+  have "(CR (k-c+1) ⨂ Id (n-c-1)) * ((psq c (k-1) n j) ⨂ v ⨂ ((pr xs (k-c-1)) ⨂ (pr ys (n-k)))) = 
+        (CR (k-c+1) * ((psq c (k-1) n j) ⨂ v)) ⨂ (Id (n-c-1) * ((pr xs (k-c-1)) ⨂ (pr ys (n-k))))" 
   proof-
-    have "dim_col (CR (k-c+1)) = dim_row ((psq c (k-1) m j) ⨂ v)"
+    have "dim_col (CR (k-c+1)) = dim_row ((psq c (k-1) n j) ⨂ v)"
       using controlled_phase_shift_def phase_shifted_qubit_def assms by simp
-    moreover have "dim_row ((pr xs (k-c-1)) ⨂ (pr ys (m-k))) = dim_col (Id (m-c-1))"
-      using assms pow_tensor_list_dim_row[of xs "k-c-1" "2"] pow_tensor_list_dim_row[of ys "m-k" "2"] dim_row_tensor_mat 
+    moreover have "dim_row ((pr xs (k-c-1)) ⨂ (pr ys (n-k))) = dim_col (Id (n-c-1))"
+      using assms pow_tensor_list_dim_row[of xs "k-c-1" "2"] pow_tensor_list_dim_row[of ys "n-k" "2"] dim_row_tensor_mat 
       by (smt Nat.add_diff_assoc2 Nat.le_diff_conv2 Quantum.Id_def add_leD1 diff_diff_left index_one_mat(3) one_add_one 
           ordered_cancel_comm_monoid_diff_class.add_diff_inverse power_add)
-    moreover have "dim_col (CR (k-c+1)) > 0" and "dim_col ((psq c (k-1) m j) ⨂ v) > 0" 
-              and "dim_col (Id (m-c-1)) > 0" and "dim_col ((pr xs (k-c-1)) ⨂ (pr ys (m-k))) > 0" 
-      using controlled_phase_shift_def phase_shifted_qubit_def Id_def phase_shifted_qubit_def pow_tensor_list_dim_col[of ys "m-k"] 
+    moreover have "dim_col (CR (k-c+1)) > 0" and "dim_col ((psq c (k-1) n j) ⨂ v) > 0" 
+              and "dim_col (Id (n-c-1)) > 0" and "dim_col ((pr xs (k-c-1)) ⨂ (pr ys (n-k))) > 0" 
+      using controlled_phase_shift_def phase_shifted_qubit_def Id_def phase_shifted_qubit_def pow_tensor_list_dim_col[of ys "n-k"] 
             pow_tensor_list_dim_col[of xs "k-c-1"] assms by auto
     ultimately show ?thesis 
       using mult_distr_tensor by auto
   qed
-  moreover have "dim_row ((pr xs (k-c-1)) ⨂ (pr ys (m-k))) = 2^(m-c-1)" 
-    using pow_tensor_list_dim_row[of xs "k-c-1"] assms pow_tensor_list_dim_row[of ys "m-k"] 
+  moreover have "dim_row ((pr xs (k-c-1)) ⨂ (pr ys (n-k))) = 2^(n-c-1)" 
+    using pow_tensor_list_dim_row[of xs "k-c-1"] assms pow_tensor_list_dim_row[of ys "n-k"] 
     by (smt Nat.add_diff_assoc2 Nat.le_diff_conv2 add_leD1 diff_diff_left dim_row_tensor_mat less_imp_le_nat one_add_one 
         ordered_cancel_comm_monoid_diff_class.add_diff_inverse power_add)
-  ultimately have "(CR (k-c+1) ⨂ Id (m-c-1)) * ((psq c (k-1) m j) ⨂ v ⨂ ((pr xs (k-c-1)) ⨂ (pr ys (m-k)))) = 
-        (CR (k-c+1) * ((psq c (k-1) m j) ⨂ v)) ⨂ ((pr xs (k-c-1)) ⨂ (pr ys (m-k)))" 
+  ultimately have "(CR (k-c+1) ⨂ Id (n-c-1)) * ((psq c (k-1) n j) ⨂ v ⨂ ((pr xs (k-c-1)) ⨂ (pr ys (n-k)))) = 
+        (CR (k-c+1) * ((psq c (k-1) n j) ⨂ v)) ⨂ ((pr xs (k-c-1)) ⨂ (pr ys (n-k)))" 
     using Id_mult_left by simp
-  then have f0: "(CR (k-c+1) ⨂ Id (m-c-1)) * ((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) =
-        (CR (k-c+1) * ((psq c (k-1) m j) ⨂ v)) ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))" 
+  then have f0: "(CR (k-c+1) ⨂ Id (n-c-1)) * ((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) =
+        (CR (k-c+1) * ((psq c (k-1) n j) ⨂ v)) ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))" 
     using tensor_mat_is_assoc by simp
-  show "(CR (k-c+1) ⨂ Id (m-c-1)) * ((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) 
-      = (psq c k m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))" 
+  show "(CR (k-c+1) ⨂ Id (n-c-1)) * ((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) 
+      = (psq c k n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))" 
   proof(rule disjE)
     show "v = |zero⟩ ∨ v = |one⟩" using assms by simp
   next
     assume "v = |zero⟩" 
-    then show "(CR (k-c+1) ⨂ Id (m-c-1)) * ((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) 
-             = (psq c k m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))" 
+    then show "(CR (k-c+1) ⨂ Id (n-c-1)) * ((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) 
+             = (psq c k n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))" 
       using app_CR_on_ket_zero assms f0 by auto
   next
     assume "v = |one⟩" 
-    then show "(CR (k-c+1) ⨂ Id (m-c-1)) * ((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) 
-             = (psq c k m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))" 
+    then show "(CR (k-c+1) ⨂ Id (n-c-1)) * ((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) 
+             = (psq c k n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))" 
       using app_CR_on_ket_one assms f0 by auto
   qed
 qed
@@ -1522,77 +1522,77 @@ proof-
 qed
 
 lemma app_SWAP_front_herm_cnj:
-  assumes "k - c ≥ 1" and "k ≥ 1" and "c ≤ m"  and "m ≥ k" 
+  assumes "k - c ≥ 1" and "k ≥ 1" and "c ≤ n"  and "n ≥ k" 
       and "dim_row v = 2" and "dim_col v = 1" 
       and "(∀x ∈ set xs. dim_row x = 2)" and "(∀y ∈ set ys. dim_row y = 2)"
       and "(∀x ∈ set xs. dim_col x = 1)" and "(∀y ∈ set ys. dim_col y = 1)" 
-      and "length xs = k - c - 1" and "length ys = m - k"
-  shows "((fSWAP (k-c) (m-k))⇧†) * (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) 
-       = ((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k)))" 
+      and "length xs = k - c - 1" and "length ys = n - k"
+  shows "((fSWAP (k-c) (n-k))⇧†) * (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) 
+       = ((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k)))" 
 proof-
-  have "(fSWAP (k-c) (m-k)) * ((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
-      = v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))" using assms app_SWAP_front by auto
-  moreover have "dim_row ((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) = 2^(k-c+(m-k))" 
+  have "(fSWAP (k-c) (n-k)) * ((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
+      = v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))" using assms app_SWAP_front by auto
+  moreover have "dim_row ((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) = 2^(k-c+(n-k))" 
     by (metis SWAP_front_dim(1) assms(1) calculation dim_row_tensor_mat index_mult_mat(2) mult.commute)
-  moreover have "dim_col ((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) = 1" 
+  moreover have "dim_col ((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) = 1" 
     by (simp add: assms(6,9-12))
-  moreover have "dim_row (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) = 2^(k-c+(m-k))" 
+  moreover have "dim_row (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) = 2^(k-c+(n-k))" 
     by (metis SWAP_front_dim(1) assms(1) calculation(1) index_mult_mat(2))
-  moreover have "dim_col (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) = 1" 
+  moreover have "dim_col (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) = 1" 
     using calculation(3) by simp
-  ultimately show "((fSWAP (k-c) (m-k))⇧†) * (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) 
-                 = ((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k)))" 
-    using SWAP_front_herm_cnj_dual[of "k-c" "m-k" "(pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))"
-                                      "v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))"] assms by auto
+  ultimately show "((fSWAP (k-c) (n-k))⇧†) * (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) 
+                 = ((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k)))" 
+    using SWAP_front_herm_cnj_dual[of "k-c" "n-k" "(pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))"
+                                      "v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))"] assms by auto
 qed
 
 lemma app_Id_SWAP_front_herm_cnj:
- assumes "k ≥ 2" and "m ≥ 1" and "k ≤ m" and "c ≥ 1" and "c ≤ k - 1" and "c ≤ m"
+ assumes "k ≥ 2" and "n ≥ 1" and "k ≤ n" and "c ≥ 1" and "c ≤ k - 1" and "c ≤ n"
       and "dim_row v = 2" and "dim_col v = 1" 
       and "(∀x ∈ set xs. dim_row x = 2)" and "(∀y ∈ set ys. dim_row y = 2)"
       and "(∀x ∈ set xs. dim_col x = 1)" and "(∀y ∈ set ys. dim_col y = 1)" 
-      and "length xs = k - c - 1" and "length ys = m - k"
-  shows "(Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * ((psq c k m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k)))
-  = (psq c k m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))"
+      and "length xs = k - c - 1" and "length ys = n - k"
+  shows "(Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * ((psq c k n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k)))
+  = (psq c k n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))"
 proof-
-  have "dim_col (Id 1) = dim_row (psq c k m j)" by (simp add: Id_def phase_shifted_qubit_def)
-  moreover have "dim_col ((fSWAP (k-c) (m-k))⇧†) = dim_row (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k)))" 
-    using SWAP_front_dim2[of k m c] assms pow_tensor_list_dim_row[of xs "(k-c-1)" "2"] pow_tensor_list_dim_row[of ys "m-k" "2"] 
+  have "dim_col (Id 1) = dim_row (psq c k n j)" by (simp add: Id_def phase_shifted_qubit_def)
+  moreover have "dim_col ((fSWAP (k-c) (n-k))⇧†) = dim_row (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k)))" 
+    using SWAP_front_dim2[of k n c] assms pow_tensor_list_dim_row[of xs "(k-c-1)" "2"] pow_tensor_list_dim_row[of ys "n-k" "2"] 
           tensor_mat_is_assoc by auto
-  moreover have "dim_col (Id 1) > 0" and "dim_col (psq c k m j) > 0" and "dim_col ((fSWAP (k-c) (m-k))⇧†) > 0"
-            and "dim_col (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) > 0" 
+  moreover have "dim_col (Id 1) > 0" and "dim_col (psq c k n j) > 0" and "dim_col ((fSWAP (k-c) (n-k))⇧†) > 0"
+            and "dim_col (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) > 0" 
     using Id_def assms phase_shifted_qubit_def SWAP_front_dim by auto
-  ultimately have "(Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * ((psq c k m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k)))
-           = ((Id 1) * (psq c k m j)) ⨂ (((fSWAP (k-c) (m-k))⇧†) * (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))))" 
+  ultimately have "(Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * ((psq c k n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k)))
+           = ((Id 1) * (psq c k n j)) ⨂ (((fSWAP (k-c) (n-k))⇧†) * (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))))" 
     using mult_distr_tensor tensor_mat_is_assoc by simp
-  then have "(Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * ((psq c k m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k)))
-           = (psq c k m j) ⨂ (((fSWAP (k-c) (m-k))⇧†) * (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))))" 
+  then have "(Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * ((psq c k n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k)))
+           = (psq c k n j) ⨂ (((fSWAP (k-c) (n-k))⇧†) * (v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))))" 
     using phase_shifted_qubit_def Id_mult_left by simp
-  then have "(Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * ((psq c k m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k)))
-           = (psq c k m j) ⨂ ( ((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))))" 
+  then have "(Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * ((psq c k n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k)))
+           = (psq c k n j) ⨂ ( ((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))))" 
     using app_SWAP_front_herm_cnj assms by auto
-  then show "(Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * ((psq c k m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k)))
-           = (psq c k m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))"
+  then show "(Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * ((psq c k n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k)))
+           = (psq c k n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))"
     using tensor_mat_is_assoc by simp
 qed
 
 lemma CR_Id_dim [simp]:
-  assumes "m ≥ c + 1"
-  shows "dim_row (CR (k-c+1) ⨂ (Id (m-c-1))) = 2^(m-c+1)"
-    and "dim_col (CR (k-c+1) ⨂ (Id (m-c-1))) = 2^(m-c+1)"
+  assumes "n ≥ c + 1"
+  shows "dim_row (CR (k-c+1) ⨂ (Id (n-c-1))) = 2^(n-c+1)"
+    and "dim_col (CR (k-c+1) ⨂ (Id (n-c-1))) = 2^(n-c+1)"
 proof-
-  have "2 + (m - c - 1) = m - c + 1" using assms by linarith
+  have "2 + (n - c - 1) = n - c + 1" using assms by linarith
   moreover have "(4::nat) = 2^2" by simp
-  ultimately have "4 * 2^(m-c-1) = (2::nat)^(m-c+1)" 
+  ultimately have "4 * 2^(n-c-1) = (2::nat)^(n-c+1)" 
     using assms power_add by metis
-  then show "dim_row (CR (k-c+1) ⨂ (Id (m-c-1))) = 2^(m-c+1)"
+  then show "dim_row (CR (k-c+1) ⨂ (Id (n-c-1))) = 2^(n-c+1)"
     using Id_def controlled_phase_shift_def by (smt dim_row_mat(1) dim_row_tensor_mat index_one_mat(2))
 next
-  have "2 + (m - c - 1) = m - c + 1" using assms by linarith
+  have "2 + (n - c - 1) = n - c + 1" using assms by linarith
   moreover have "(4::nat) = 2^2" by simp
-  ultimately have "4 * 2^(m-c-1) = (2::nat)^(m-c+1)" 
+  ultimately have "4 * 2^(n-c-1) = (2::nat)^(n-c+1)" 
     using assms power_add by metis
-  then show "dim_col (CR (k-c+1) ⨂ (Id (m-c-1))) = 2^(m-c+1)"
+  then show "dim_col (CR (k-c+1) ⨂ (Id (n-c-1))) = 2^(n-c+1)"
     by (simp add: Quantum.Id_def controlled_phase_shift_def)
 qed
 
@@ -1601,43 +1601,45 @@ subsection ‹Applying an $R_k$›
 
 (*Find a good abbreviation for this. Why doesn't something like R⇩_ _ _ work? *)
 
-(*k is the index of the qubit that should be added to the binary fraction, i.e. the controll qubit. 
-c is the current qubit *)
+(*CR_on_all is a gate that is applied to all qubits of the system. It uses fSWAP to swap the control 
+qubit, i.e. the qubit whose index k should be added to the binary fraction to the front and then applies
+a CR gate to the current qubit and the control qubit. Afterwards the control qubit is swapped back to 
+position k. *)
 definition CR_on_all :: "nat ⇒ nat ⇒ nat ⇒ complex Matrix.mat" ("R⇩_ _ _" 75) where
-"CR_on_all c k m ≡ (Id (c-1)) ⨂ ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))"
+"CR_on_all c k n ≡ (Id (c-1)) ⨂ ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))"
 
 lemma CR_on_all_dim[simp]:
-  assumes "k - c ≥ 1" and "c ≥ 1" and "m ≥ k"
-  shows "dim_row (CR_on_all c k m) = 2^m"
-    and "dim_col (CR_on_all c k m) = 2^m"
+  assumes "k - c ≥ 1" and "c ≥ 1" and "n ≥ k"
+  shows "dim_row (CR_on_all c k n) = 2^n"
+    and "dim_col (CR_on_all c k n) = 2^n"
 proof-
-  have "dim_row (CR_on_all c k m) = dim_row (Id (c-1)) * dim_row ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)))"
+  have "dim_row (CR_on_all c k n) = dim_row (Id (c-1)) * dim_row ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)))"
     using CR_on_all_def by simp
-  moreover have "2^(c-Suc 0) * (2 * 2^(k+(m-k)-c)) = (2::nat)^m" using assms 
+  moreover have "2^(c-Suc 0) * (2 * 2^(k+(n-k)-c)) = (2::nat)^n" using assms 
     by (metis (no_types, lifting) One_nat_def Suc_le_eq aux_calculation(1) le_add_diff_inverse 
         semigroup_mult_class.mult.assoc trans_less_add1 zero_less_diff)
-  ultimately show "dim_row (CR_on_all c k m) = 2^m"
-    using Id_def[of "c-1"] Id_def[of 1] SWAP_front_dagger_dim[of "k-c" "m-k"] assms by simp
+  ultimately show "dim_row (CR_on_all c k n) = 2^n"
+    using Id_def[of "c-1"] Id_def[of 1] SWAP_front_dagger_dim[of "k-c" "n-k"] assms by simp
 next
-  have "dim_col (CR_on_all c k m) = dim_col (Id (c-1)) * dim_col (Id 1 ⨂ (fSWAP (k-c) (m-k)))"
+  have "dim_col (CR_on_all c k n) = dim_col (Id (c-1)) * dim_col (Id 1 ⨂ (fSWAP (k-c) (n-k)))"
     using CR_on_all_def by simp
-  moreover have "2^(c-Suc 0) * (2 * 2^(k+(m-k)-c)) = (2::nat)^m" using assms 
+  moreover have "2^(c-Suc 0) * (2 * 2^(k+(n-k)-c)) = (2::nat)^n" using assms 
     by (metis (no_types, lifting) One_nat_def Suc_le_eq aux_calculation(1) le_add_diff_inverse 
         semigroup_mult_class.mult.assoc trans_less_add1 zero_less_diff)
-  ultimately show "dim_col (CR_on_all c k m) = 2^m"
-    using Id_def[of "c-1"] Id_def[of 1] SWAP_front_dagger_dim[of "k-c" "m-k"] assms by simp
+  ultimately show "dim_col (CR_on_all c k n) = 2^n"
+    using Id_def[of "c-1"] Id_def[of 1] SWAP_front_dagger_dim[of "k-c" "n-k"] assms by simp
 qed
 
 lemma Id_tensor_SWAP_front_is_gate:
-  assumes "m ≥ k" and "k > c"
-  shows "gate (m-c+1) (Id 1 ⨂ (fSWAP (k-c) (m-k)))"
+  assumes "n ≥ k" and "k > c"
+  shows "gate (n-c+1) (Id 1 ⨂ (fSWAP (k-c) (n-k)))"
 proof-
-  have "k - c + (m - k) = m - c" using assms by simp
-  then have "gate (m-c) (fSWAP (k-c) (m-k))" using SWAP_front_gate[of "k-c" "m-k"] assms by simp
+  have "k - c + (n - k) = n - c" using assms by simp
+  then have "gate (n-c) (fSWAP (k-c) (n-k))" using SWAP_front_gate[of "k-c" "n-k"] assms by simp
   moreover have "gate 1 (Id 1)" by simp
-  moreover have "1+(m-c) = m-c+1" using assms by simp
+  moreover have "1+(n-c) = n-c+1" using assms by simp
   ultimately show ?thesis 
-    using tensor_gate[of 1 "Id 1" "m-c" "(fSWAP (k-c) (m-k))"] by simp
+    using tensor_gate[of 1 "Id 1" "n-c" "(fSWAP (k-c) (n-k))"] by simp
 qed
 
 lemma CR_tensor_Id_is_gate:
@@ -1651,68 +1653,68 @@ proof-
 qed
 
 lemma SWAP_front_cnj_is_gate:
-  assumes "m - c ≥ 1" and "k ≤ m" and "1 ≤ k - c" 
-  shows "gate (m-c) ((fSWAP (k-c) (m-k))⇧†)"
+  assumes "n - c ≥ 1" and "k ≤ n" and "1 ≤ k - c" 
+  shows "gate (n-c) ((fSWAP (k-c) (n-k))⇧†)"
 proof
-  show "dim_row ((fSWAP (k-c) (m-k))⇧†) = 2^(m-c)" using SWAP_front_dim2[of k m c] assms by simp
+  show "dim_row ((fSWAP (k-c) (n-k))⇧†) = 2^(n-c)" using SWAP_front_dim2[of k n c] assms by simp
 next
-  show "square_mat ((fSWAP (k-c) (m-k))⇧†)" using SWAP_front_dim2[of k m c] assms by simp 
+  show "square_mat ((fSWAP (k-c) (n-k))⇧†)" using SWAP_front_dim2[of k n c] assms by simp 
 next
-  show "unitary ((fSWAP (k-c) (m-k))⇧†)"
+  show "unitary ((fSWAP (k-c) (n-k))⇧†)"
     using assms SWAP_front_unitary
     by (metis dagger_of_prod dim_col_of_dagger dim_row_of_dagger dagger_of_id_is_id unitary_def)
 qed
 
 lemma Id_tensor_SWAP_front_cnj_is_gate:
-  assumes "m - c ≥ 1" and "k ≤ m" and "1 ≤ k - c" 
-  shows "gate (m-c+1) (Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†))"
+  assumes "n - c ≥ 1" and "k ≤ n" and "1 ≤ k - c" 
+  shows "gate (n-c+1) (Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†))"
   using assms
   by (metis SWAP_front_cnj_is_gate add.commute id_is_gate tensor_gate)
 
 lemma CR_on_all_wth_Id_is_gate:
-  assumes "m > c" and "c < k" and "k ≤ m"
-  shows "gate (m-c+1) ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))"
+  assumes "n > c" and "c < k" and "k ≤ n"
+  shows "gate (n-c+1) ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))"
 proof-
-  have "gate (m-c+1) ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)))" 
+  have "gate (n-c+1) ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)))" 
     using prod_of_gate_is_gate CR_tensor_Id_is_gate Id_tensor_SWAP_front_cnj_is_gate assms by simp
-  moreover have "gate (m-c+1) (Id 1 ⨂ (fSWAP (k-c) (m-k)))" using Id_tensor_SWAP_front_is_gate assms by simp
-  ultimately show "gate (m-c+1) ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))"
+  moreover have "gate (n-c+1) (Id 1 ⨂ (fSWAP (k-c) (n-k)))" using Id_tensor_SWAP_front_is_gate assms by simp
+  ultimately show "gate (n-c+1) ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))"
     using prod_of_gate_is_gate by simp
 qed
 
 lemma CR_on_all_is_gate:
-  assumes "k - c ≥ 1" and "c ≥ 1" and "m ≥ k" and "c < k" 
-  shows "gate m (CR_on_all c k m)"
+  assumes "k - c ≥ 1" and "c ≥ 1" and "n ≥ k" and "c < k" 
+  shows "gate n (CR_on_all c k n)"
 proof
-  show "dim_row (CR_on_all c k m) = 2^m" using assms CR_on_all_dim by simp
+  show "dim_row (CR_on_all c k n) = 2^n" using assms CR_on_all_dim by simp
 next
-  show "square_mat (CR_on_all c k m)" using assms CR_on_all_dim by simp
+  show "square_mat (CR_on_all c k n)" using assms CR_on_all_dim by simp
 next
-  show "unitary (CR_on_all c k m)"
+  show "unitary (CR_on_all c k n)"
   proof-
-    have "((CR_on_all c k m)⇧†) * (CR_on_all c k m) = 1⇩m (dim_col (CR_on_all c k m))" 
+    have "((CR_on_all c k n)⇧†) * (CR_on_all c k n) = 1⇩m (dim_col (CR_on_all c k n))" 
     proof-
       have "gate (c - 1) (Quantum.Id (c - 1))" using id_is_gate by blast
-      moreover have "gate (m-c+1) ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))" 
+      moreover have "gate (n-c+1) ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))" 
         using CR_on_all_wth_Id_is_gate assms by simp
-      ultimately have "((CR_on_all c k m)⇧†) * (CR_on_all c k m) 
-  = 1⇩m (dim_col (Id (c-1)) * dim_col ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k)))))" 
-        using CR_on_all_def tensor_gate_unitary1[of "c-1" "Id (c-1)" "m-c+1" 
-              "((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))"]
+      ultimately have "((CR_on_all c k n)⇧†) * (CR_on_all c k n) 
+  = 1⇩m (dim_col (Id (c-1)) * dim_col ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k)))))" 
+        using CR_on_all_def tensor_gate_unitary1[of "c-1" "Id (c-1)" "n-c+1" 
+              "((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))"]
         by simp
-      moreover have "(dim_col (Id (c-1)) * dim_col ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))) = 2^m" 
+      moreover have "(dim_col (Id (c-1)) * dim_col ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))) = 2^n" 
       proof-
         have "dim_col (Id (c-1)) = 2^(c-1)" using Id_def by simp
-        moreover have "dim_col ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k)))) = 2^(m-c+1)" 
+        moreover have "dim_col ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k)))) = 2^(n-c+1)" 
           using Id_tensor_SWAP_front_dim(2) assms(1,3) by simp
-        moreover have "2^(c-1) * 2^(m-c+1) = (2::nat)^m" using assms 
+        moreover have "2^(c-1) * 2^(n-c+1) = (2::nat)^n" using assms 
           by (metis CR_on_all_def CR_on_all_dim(2) calculation(1) calculation(2) dim_col_tensor_mat)
         ultimately show ?thesis by metis
       qed
-      moreover have "dim_col (CR_on_all c k m) = (2::real)^m" using CR_on_all_dim assms by simp
+      moreover have "dim_col (CR_on_all c k n) = (2::real)^n" using CR_on_all_dim assms by simp
       ultimately show ?thesis by simp
     qed
-    moreover have "((CR_on_all c k m) * ((CR_on_all c k m)⇧†)) = 1⇩m (dim_col (CR_on_all c k m))" 
+    moreover have "((CR_on_all c k n) * ((CR_on_all c k n)⇧†)) = 1⇩m (dim_col (CR_on_all c k n))" 
       using calculation assms
       by (metis CR_on_all_dim(1) CR_on_all_dim(2) carrier_matI dim_col_of_dagger dim_row_of_dagger mat_mult_left_right_inverse)
     ultimately show ?thesis by (metis dim_col_of_dagger index_mult_mat(3) unitary_def)
@@ -1720,263 +1722,263 @@ next
 qed
 
 lemma app_CR_on_all_wo_Id:
-  assumes "k ≥ 2" and "m ≥ 1" and "k ≤ m" and "c ≥ 1" and "c ≤ k - 1" and "c < m" 
+  assumes "k ≥ 2" and "n ≥ 1" and "k ≤ n" and "c ≥ 1" and "c ≤ k - 1" and "c < n" 
       and "dim_row v = 2" and "dim_col v = 1" 
       and "v = |zero⟩ ∨ v = |one⟩"
-      and "v = |zero⟩ ⟶ ((bin_rep m j)!(k-1)) = 0"
-      and "v = |one⟩ ⟶  ((bin_rep m j)!(k-1)) = 1" 
+      and "v = |zero⟩ ⟶ ((bin_rep n j)!(k-1)) = 0"
+      and "v = |one⟩ ⟶  ((bin_rep n j)!(k-1)) = 1" 
       and "(∀x ∈ set xs. dim_row x = 2)" and "(∀y ∈ set ys. dim_row y = 2)"
       and "(∀x ∈ set xs. dim_col x = 1)" and "(∀y ∈ set ys. dim_col y = 1)" 
-      and "length xs = (k-c-1)" and "length ys = m-k"
-  shows "((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ (Id (m-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))
-       * ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
-       = (psq c k m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))"
+      and "length xs = (k-c-1)" and "length ys = n-k"
+  shows "((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ (Id (n-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))
+       * ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
+       = (psq c k n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))"
 proof-
   have f0: "1 ≤ k - c ∧ 1 ≤ k" using assms 
     by (metis Nat.diff_diff_right diff_add_inverse diff_le_self le_diff_iff' le_trans)
-  have "((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ (Id (m-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))
-        * ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
-        = (Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ (Id (m-c-1))) * ((Id 1 ⨂ (fSWAP (k-c) (m-k)))
-        * ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))))" 
+  have "((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ (Id (n-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))
+        * ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
+        = (Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ (Id (n-c-1))) * ((Id 1 ⨂ (fSWAP (k-c) (n-k)))
+        * ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))))" 
   proof-
-    have "k ≤ m ∧ 1 ≤ k - c ∧ c + 1 ≤ m" using assms(3) f0 by linarith
-    then have "(Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) ∈ carrier_mat (2^(m-c+1)) (2^(m-c+1))" 
-      using Id_tensor_SWAP_front_herm_cnj_dim[of k m c] CR_Id_dim[of c m k] assms f0 
+    have "k ≤ n ∧ 1 ≤ k - c ∧ c + 1 ≤ n" using assms(3) f0 by linarith
+    then have "(Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) ∈ carrier_mat (2^(n-c+1)) (2^(n-c+1))" 
+      using Id_tensor_SWAP_front_herm_cnj_dim[of k n c] CR_Id_dim[of c n k] assms f0 
       by (metis carrier_matI index_mult_mat(2) index_mult_mat(3))
-    moreover have "(Id 1 ⨂ (fSWAP (k-c) (m-k))) ∈ carrier_mat (2^(m-c+1)) (2^(m-c+1))"
-      using Id_tensor_SWAP_front_dim[of k m c] assms using f0 by blast       
-    moreover have "((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) ∈ carrier_mat (2^(m-c+1)) 1" 
+    moreover have "(Id 1 ⨂ (fSWAP (k-c) (n-k))) ∈ carrier_mat (2^(n-c+1)) (2^(n-c+1))"
+      using Id_tensor_SWAP_front_dim[of k n c] assms using f0 by blast       
+    moreover have "((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) ∈ carrier_mat (2^(n-c+1)) 1" 
     proof- 
       have "dim_row (pr xs (k-c-1)) = 2^(k-c-1)"  
         using pow_tensor_list_dim_row[of xs "(k-c-1)" 2] assms(12,16) by blast
-      moreover have "dim_row (pr ys (m-k)) = 2^(m-k)" using pow_tensor_list_dim_row[of ys "m-k" 2] assms(13,17) by blast
-      moreover have "2 * (2^(m-k) * 2^(k-Suc c)) = (2::nat)^(m-c)" 
+      moreover have "dim_row (pr ys (n-k)) = 2^(n-k)" using pow_tensor_list_dim_row[of ys "n-k" 2] assms(13,17) by blast
+      moreover have "2 * (2^(n-k) * 2^(k-Suc c)) = (2::nat)^(n-c)" 
         using assms f0 
         by (metis Nat.add_diff_assoc2 add.commute diff_diff_left le_SucI ordered_cancel_comm_monoid_diff_class.add_diff_inverse 
             plus_1_eq_Suc power_add power_commutes semiring_normalization_rules(19) semiring_normalization_rules(28))
-      ultimately have "dim_row ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) = 2^(m-c+1)" 
-        using assms phase_shifted_qubit_def aux_calculation(6)[of k c m] by auto
-      moreover have "dim_col ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) = 1" 
-        using pow_tensor_list_dim_col[of xs "(k-c-1)"] pow_tensor_list_dim_col[of ys "m-k"]
+      ultimately have "dim_row ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) = 2^(n-c+1)" 
+        using assms phase_shifted_qubit_def aux_calculation(6)[of k c n] by auto
+      moreover have "dim_col ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) = 1" 
+        using pow_tensor_list_dim_col[of xs "(k-c-1)"] pow_tensor_list_dim_col[of ys "n-k"]
           phase_shifted_qubit_def assms by auto
       ultimately show ?thesis by blast
     qed
     ultimately show ?thesis 
-      using assoc_mult_mat[of "(Id 1 ⨂ ((fSWAP k (m-k))⇧†)) * (CR k ⨂ (Id (m-c)))" "2^(m+1)" "2^(m+1)"
-            "(Id 1 ⨂ (fSWAP k (m-k)))" "2^(m+1)" "((psq c k m j) ⨂ (pr xs (k-1)) ⨂ v ⨂ (pr ys (m-k))) " "1"]
+      using assoc_mult_mat[of "(Id 1 ⨂ ((fSWAP k (n-k))⇧†)) * (CR k ⨂ (Id (n-c)))" "2^(n+1)" "2^(n+1)"
+            "(Id 1 ⨂ (fSWAP k (n-k)))" "2^(n+1)" "((psq c k n j) ⨂ (pr xs (k-1)) ⨂ v ⨂ (pr ys (n-k))) " "1"]
           assms by auto
   qed
-  then have "((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ (Id (m-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))
-        * ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
-     = (Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ (Id (m-c-1))) * ((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) "
-    using app_Id_tensor_fSWAP[of k m c v xs ys] assms tensor_mat_is_assoc by auto
-  moreover have "(Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ (Id (m-c-1))) * ((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k)))
-               = (Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * ((CR (k-c+1) ⨂ (Id (m-c-1))) * ((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))))"
+  then have "((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ (Id (n-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))
+        * ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
+     = (Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ (Id (n-c-1))) * ((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) "
+    using app_Id_tensor_fSWAP[of k n c v xs ys] assms tensor_mat_is_assoc by auto
+  moreover have "(Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ (Id (n-c-1))) * ((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k)))
+               = (Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * ((CR (k-c+1) ⨂ (Id (n-c-1))) * ((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))))"
   proof-
-    have "(Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) ∈ carrier_mat (2^(m-c+1)) (2^(m-c+1))" 
+    have "(Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) ∈ carrier_mat (2^(n-c+1)) (2^(n-c+1))" 
       using Id_tensor_SWAP_front_herm_cnj_dim assms f0 by auto
-    moreover have "(CR (k-c+1) ⨂ (Id (m-c-1))) ∈ carrier_mat (2^(m-c+1)) (2^(m-c+1))" 
+    moreover have "(CR (k-c+1) ⨂ (Id (n-c-1))) ∈ carrier_mat (2^(n-c+1)) (2^(n-c+1))" 
       using CR_Id_dim assms by auto
-    moreover have "((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) ∈ carrier_mat (2^(m-c+1)) 1"
+    moreover have "((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) ∈ carrier_mat (2^(n-c+1)) 1"
     proof-
-      have "dim_row ((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) = (2^(m-c+1))"
-        using assms phase_shifted_qubit_def pow_tensor_list_dim_row[of xs "k-c-1" 2] pow_tensor_list_dim_row[of ys "m-k" 2] f0 by auto 
-      moreover have "dim_col ((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) = 1"
-        using assms phase_shifted_qubit_def pow_tensor_list_dim_col[of xs "k-c-1"] pow_tensor_list_dim_col[of ys "m-k"] f0 by simp 
+      have "dim_row ((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) = (2^(n-c+1))"
+        using assms phase_shifted_qubit_def pow_tensor_list_dim_row[of xs "k-c-1" 2] pow_tensor_list_dim_row[of ys "n-k" 2] f0 by auto 
+      moreover have "dim_col ((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) = 1"
+        using assms phase_shifted_qubit_def pow_tensor_list_dim_col[of xs "k-c-1"] pow_tensor_list_dim_col[of ys "n-k"] f0 by simp 
       ultimately show ?thesis by auto
     qed
     ultimately show ?thesis by simp
   qed
-  ultimately have "((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ (Id (m-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))
-        * ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
-     = (Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * ((CR (k-c+1) ⨂ (Id (m-c-1))) * ((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))))"
+  ultimately have "((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ (Id (n-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))
+        * ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
+     = (Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * ((CR (k-c+1) ⨂ (Id (n-c-1))) * ((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))))"
     by simp
-  moreover have "(CR (k-c+1) ⨂ Id (m-c-1)) * ((psq c (k-1) m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))) 
-        = (psq c k m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k))" 
-    using app_CR_tensor_Id[of k m c v j xs ys] assms by auto
-  ultimately have "((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ (Id (m-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))
-                 * ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
-                 = (Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * ((psq c k m j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (m-k)))" 
+  moreover have "(CR (k-c+1) ⨂ Id (n-c-1)) * ((psq c (k-1) n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))) 
+        = (psq c k n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k))" 
+    using app_CR_tensor_Id[of k n c v j xs ys] assms by auto
+  ultimately have "((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ (Id (n-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))
+                 * ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
+                 = (Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * ((psq c k n j) ⨂ v ⨂ (pr xs (k-c-1)) ⨂ (pr ys (n-k)))" 
     by simp
-  then show "((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ (Id (m-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))
-                 * ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
-                 = ((psq c k m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k)))" 
+  then show "((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ (Id (n-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))
+                 * ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
+                 = ((psq c k n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k)))" 
     using assms f0 app_Id_SWAP_front_herm_cnj by auto
 qed
 
 lemma app_CR_on_all:
-  assumes "k ≥ 2" and "m ≥ 1" and "k ≤ m" and "c ≥ 1" and "c ≤ k - 1" and "c ≤ m" 
+  assumes "k ≥ 2" and "n ≥ 1" and "k ≤ n" and "c ≥ 1" and "c ≤ k - 1" and "c ≤ n" 
       and "dim_row v = 2" and "dim_col v = 1" 
       and "v = |zero⟩ ∨ v = |one⟩"
-      and "v = |zero⟩ ⟶ ((bin_rep m j)!(k-1)) = 0"
-      and "v = |one⟩ ⟶  ((bin_rep m j)!(k-1)) = 1" 
+      and "v = |zero⟩ ⟶ ((bin_rep n j)!(k-1)) = 0"
+      and "v = |one⟩ ⟶  ((bin_rep n j)!(k-1)) = 1" 
       and "(∀x ∈ set xs. dim_row x = 2)" and "(∀y ∈ set ys. dim_row y = 2)"
       and "(∀x ∈ set xs. dim_col x = 1)" and "(∀y ∈ set ys. dim_col y = 1)" 
       and "(∀c ∈ set cs. dim_row c = 2)" and "(∀c ∈ set cs. dim_col c = 1)" 
-      and "length xs = (k-c-1)" and "length ys = m-k" and "length cs = c-1"
-  shows "(CR_on_all c k m) * ((pr cs (c-1)) ⨂ (psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
-       = ((pr cs (c-1)) ⨂ (psq c k m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k)))"
+      and "length xs = (k-c-1)" and "length ys = n-k" and "length cs = c-1"
+  shows "(CR_on_all c k n) * ((pr cs (c-1)) ⨂ (psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
+       = ((pr cs (c-1)) ⨂ (psq c k n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k)))"
 proof-
   have f0: "1 ≤ k - c" using assms(4,5) by linarith
-  have "(CR_on_all c k m) * ((pr cs (c-1)) ⨂ (psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
-       = (Id (c-1) ⨂ (Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))
-       * ((pr cs (c-1)) ⨂ (psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k)))" 
-    using CR_on_all_def[of c k m] by simp
-  then have "(CR_on_all c k m) * ((pr cs (c-1)) ⨂ (psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
-       = (Id (c-1) ⨂ ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k)))))
-       * ((pr cs (c-1)) ⨂ ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))))" 
+  have "(CR_on_all c k n) * ((pr cs (c-1)) ⨂ (psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
+       = (Id (c-1) ⨂ (Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))
+       * ((pr cs (c-1)) ⨂ (psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k)))" 
+    using CR_on_all_def[of c k n] by simp
+  then have "(CR_on_all c k n) * ((pr cs (c-1)) ⨂ (psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
+       = (Id (c-1) ⨂ ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k)))))
+       * ((pr cs (c-1)) ⨂ ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))))" 
     using tensor_mat_is_assoc by simp
-  moreover have "(Id (c-1) ⨂ ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k)))))
-       * ((pr cs (c-1)) ⨂ ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))))
+  moreover have "(Id (c-1) ⨂ ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k)))))
+       * ((pr cs (c-1)) ⨂ ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))))
        = (Id (c-1) * pr cs (c-1)) 
-      ⨂ (((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k)))) 
-         * ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))))" 
+      ⨂ (((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k)))) 
+         * ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))))" 
   proof- 
     have "dim_col (Id (c-1)) = dim_row (pr cs (c-1))" 
       using Id_def pow_tensor_list_dim_row[of cs "c-1" 2] assms by auto
-    moreover have "dim_col ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k)))) 
-        = dim_row ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k)))" 
+    moreover have "dim_col ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k)))) 
+        = dim_row ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k)))" 
     proof-
-      have "2^(k-Suc c) * (2 * 2^(m-k)) = (2::nat)^(m-c) " 
-        using assms(1,3,5,6) aux_calculation(4)[of k c m] f0 by (metis (no_types, lifting) semigroup_mult_class.mult.assoc)
-      then have "dim_row ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) = 2^(m-c+1)"
+      have "2^(k-Suc c) * (2 * 2^(n-k)) = (2::nat)^(n-c) " 
+        using assms(1,3,5,6) aux_calculation(4)[of k c n] f0 by (metis (no_types, lifting) semigroup_mult_class.mult.assoc)
+      then have "dim_row ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) = 2^(n-c+1)"
       proof-
         have "dim_row (pr xs (k-c-1)) = 2^(k-c-1)" using pow_tensor_list_dim_row[of xs "k-c-1" 2] assms(12-13,18-20) by simp
         moreover have "dim_row v = 2" using assms(9) ket_vec_def by auto
-        moreover have "dim_row (pr ys (m-k)) = 2^(m-k)" using pow_tensor_list_dim_row[of ys "m-k" 2] assms(12-13,18-20) by simp
-        moreover have "dim_row (psq c (k-1) m j) = 2" using phase_shifted_qubit_def by simp
-        moreover have "2 * (2 ^ (m - k) * 2 ^ (k - Suc c)) = (2::nat) ^ (m - c)" using assms 
-          by (metis ‹2 ^ (k - Suc c) * (2 * 2 ^ (m - k)) = 2 ^ (m - c)› mult.commute semigroup_mult_class.mult.assoc)
-        ultimately show ?thesis using dim_row_tensor_mat[of "(psq c (k-1) m j)" "((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k)))"] by auto
+        moreover have "dim_row (pr ys (n-k)) = 2^(n-k)" using pow_tensor_list_dim_row[of ys "n-k" 2] assms(12-13,18-20) by simp
+        moreover have "dim_row (psq c (k-1) n j) = 2" using phase_shifted_qubit_def by simp
+        moreover have "2 * (2 ^ (n - k) * 2 ^ (k - Suc c)) = (2::nat) ^ (n - c)" using assms 
+          by (metis ‹2 ^ (k - Suc c) * (2 * 2 ^ (n - k)) = 2 ^ (n - c)› mult.commute semigroup_mult_class.mult.assoc)
+        ultimately show ?thesis using dim_row_tensor_mat[of "(psq c (k-1) n j)" "((pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k)))"] by auto
       qed
-      moreover have "dim_col ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))
-          = dim_col (Id 1 ⨂ (fSWAP (k-c) (m-k)))" by auto
-      moreover have "dim_col (Id 1 ⨂ (fSWAP (k-c) (m-k))) = 2^(m-c+1)"
+      moreover have "dim_col ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))
+          = dim_col (Id 1 ⨂ (fSWAP (k-c) (n-k)))" by auto
+      moreover have "dim_col (Id 1 ⨂ (fSWAP (k-c) (n-k))) = 2^(n-c+1)"
         using Id_def SWAP_front_dim assms by simp
       ultimately show ?thesis by simp
     qed
     moreover have "dim_col (Id (c-1)) > 0" and "dim_col (pr cs (c-1)) > 0" and 
-                  "dim_col ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k)))) > 0" and
-                  "dim_col ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) > 0" 
+                  "dim_col ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k)))) > 0" and
+                  "dim_col ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) > 0" 
          apply (auto simp: pow_tensor_list_dim_col[of cs "c-1"] assms phase_shifted_qubit_def Id_def)
-        using SWAP_front_dim2(2)[of k m c] assms(3,5) f0 by simp
+        using SWAP_front_dim2(2)[of k n c] assms(3,5) f0 by simp
     ultimately show ?thesis
       using mult_distr_tensor[of "(Id (c-1))" "(pr cs (c-1))" 
-            "((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))"
-            "((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k)))"] by auto
+            "((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))"
+            "((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k)))"] by auto
   qed
   moreover have "(Id (c-1) * pr cs (c-1)) = pr cs (c-1)" 
     using Id_mult_left[of "pr cs (c-1)" "(c-1)"] pow_tensor_list_dim_row[of cs "c-1" 2] assms by auto
-  ultimately have "(CR_on_all c k m) * ((pr cs (c-1)) ⨂ (psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
+  ultimately have "(CR_on_all c k n) * ((pr cs (c-1)) ⨂ (psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
        =  pr cs (c-1) 
-      ⨂ ( ((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ Id (m-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (m-k)))) 
-         * ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) )" 
+      ⨂ ( ((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ Id (n-c-1)) * (Id 1 ⨂ (fSWAP (k-c) (n-k)))) 
+         * ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) )" 
     by simp
-  moreover have "((Id 1 ⨂ ((fSWAP (k-c) (m-k))⇧†)) * (CR (k-c+1) ⨂ (Id (m-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (m-k))))
-        * ((psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
-        = (psq c k m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))" 
-    using app_CR_on_all_wo_Id[of k m c v j xs ys] assms by linarith
-  ultimately show "(CR_on_all c k m) * ((pr cs (c-1)) ⨂ (psq c (k-1) m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))) 
-       =  pr cs (c-1) ⨂ (psq c k m j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (m-k))"
+  moreover have "((Id 1 ⨂ ((fSWAP (k-c) (n-k))⇧†)) * (CR (k-c+1) ⨂ (Id (n-c-1))) * (Id 1 ⨂ (fSWAP (k-c) (n-k))))
+        * ((psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
+        = (psq c k n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))" 
+    using app_CR_on_all_wo_Id[of k n c v j xs ys] assms by linarith
+  ultimately show "(CR_on_all c k n) * ((pr cs (c-1)) ⨂ (psq c (k-1) n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))) 
+       =  pr cs (c-1) ⨂ (psq c k n j) ⨂ (pr xs (k-c-1)) ⨂ v ⨂ (pr ys (n-k))"
     using tensor_mat_is_assoc by simp
 qed
 
 lemma CR_on_all_on_qr:
- assumes "j < 2^m" and "n ≤ m" and "c ≤ m" and "c < n" and "m ≥ c + 1"
-     and "n ≥ 2" and "m ≥ 1" and "c ≥ 1"
+ assumes "j < 2^n" and "m ≤ n" and "c ≤ n" and "c < m" and "n ≥ c + 1"
+     and "m ≥ 2" and "n ≥ 1" and "c ≥ 1"
   shows 
- "(CR_on_all c n m) * ((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (n-1) m j) ⨂ (⨂r (c+1) (m-c) m j))
-= ((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c n m j) ⨂ (⨂r (c+1) (m-c) m j))"
+ "(CR_on_all c m n) * ((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (m-1) n j) ⨂ (⨂r (c+1) (n-c) n j))
+= ((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c m n j) ⨂ (⨂r (c+1) (n-c) n j))"
 proof-
-  have f0: "(⨂r (c+1) (m-c) m j) = (⨂r (c+1) (n-(c+1)) m j) ⨂ (⨂r n 1 m j) ⨂ (⨂r (n+1) (m-n) m j)"
+  have f0: "(⨂r (c+1) (n-c) n j) = (⨂r (c+1) (m-(c+1)) n j) ⨂ (⨂r m 1 n j) ⨂ (⨂r (m+1) (n-m) n j)"
   proof(rule disjE)
-    show "n < m ∨ n = m" using assms by auto
+    show "m < n ∨ m = n" using assms by auto
   next
-     assume a0: "n < m"
-     moreover have "n + 1 - (c + 1) ≤ m - c" using assms by simp
-     moreover have "c + 1 + (m - c) - 1 ≤ m" using assms a0 by simp
-     ultimately have "(⨂r (c+1) (m-c) m j) = (⨂r (c+1) ((n+1)-(c+1)-1) m j) ⨂ (⨂r (n+1-1) 1 m j) ⨂ (⨂r (n+1) ((m-c)-((n+1)-(c+1))) m j)"  
-       using to_tensor_prod_decomp_middle[of j m "c+1" "n+1" "m-c"] assms a0 by simp
-     moreover have "(m-c)-((n+1)-(c+1)) = m-n" using assms by simp
+     assume a0: "m < n"
+     moreover have "m + 1 - (c + 1) ≤ n - c" using assms by simp
+     moreover have "c + 1 + (n - c) - 1 ≤ n" using assms a0 by simp
+     ultimately have "(⨂r (c+1) (n-c) n j) = (⨂r (c+1) ((m+1)-(c+1)-1) n j) ⨂ (⨂r (m+1-1) 1 n j) ⨂ (⨂r (m+1) ((n-c)-((m+1)-(c+1))) n j)"  
+       using to_tensor_prod_decomp_middle[of j n "c+1" "m+1" "n-c"] assms a0 by simp
+     moreover have "(n-c)-((m+1)-(c+1)) = n-m" using assms by simp
      ultimately show ?thesis by simp
   next
-     assume a0: "n = m" 
-     have "((c + 1) + (m - c - 1)) = m" using add.left_commute add_diff_cancel_left assms by linarith
-     moreover have "(⨂r (c+1) (m-c) m j) = (⨂r (c+1) (m-c-1) m j) ⨂ (⨂r ((c+1)+(m-c-1)) 1 m j)" 
-       using assms to_tensor_prod_decomp_right[of j m "c+1" "m-c-1"] by simp
-     ultimately have "(⨂r (c+1) (m-c) m j) = (⨂r (c+1) (n-(c+1)) m j) ⨂ (⨂r n 1 m j)" 
+     assume a0: "m = n" 
+     have "((c + 1) + (n - c - 1)) = n" using add.left_commute add_diff_cancel_left assms by linarith
+     moreover have "(⨂r (c+1) (n-c) n j) = (⨂r (c+1) (n-c-1) n j) ⨂ (⨂r ((c+1)+(n-c-1)) 1 n j)" 
+       using assms to_tensor_prod_decomp_right[of j n "c+1" "n-c-1"] by simp
+     ultimately have "(⨂r (c+1) (n-c) n j) = (⨂r (c+1) (m-(c+1)) n j) ⨂ (⨂r m 1 n j)" 
        by (simp add: a0)
-     moreover have "(⨂r (n+1) (m-n) m j) = (Id 0)" using a0 by simp
+     moreover have "(⨂r (m+1) (n-m) n j) = (Id 0)" using a0 by simp
      ultimately show ?thesis by simp
   qed
-  then have "(CR_on_all c n m) * ((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (n-1) m j) ⨂ (⨂r (c+1) (m-c) m j))
-= (CR_on_all c n m) * ((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (n-1) m j) ⨂ (⨂r (c+1) (n-(c+1)) m j) ⨂ (⨂r n 1 m j) ⨂ (⨂r (n+1) (m-n) m j))"
+  then have "(CR_on_all c m n) * ((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (m-1) n j) ⨂ (⨂r (c+1) (n-c) n j))
+= (CR_on_all c m n) * ((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (m-1) n j) ⨂ (⨂r (c+1) (m-(c+1)) n j) ⨂ (⨂r m 1 n j) ⨂ (⨂r (m+1) (n-m) n j))"
     using tensor_mat_is_assoc by simp
-  moreover have "(CR_on_all c n m) * ((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (n-1) m j) ⨂ (⨂r (c+1) (n-(c+1)) m j) ⨂ (⨂r n 1 m j) ⨂ (⨂r (n+1) (m-n) m j))
-= ((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c n m j) ⨂ (⨂r (c+1) (n-(c+1)) m j) ⨂ (⨂r n 1 m j) ⨂ (⨂r (n+1) (m-n) m j))"
+  moreover have "(CR_on_all c m n) * ((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (m-1) n j) ⨂ (⨂r (c+1) (m-(c+1)) n j) ⨂ (⨂r m 1 n j) ⨂ (⨂r (m+1) (n-m) n j))
+= ((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c m n j) ⨂ (⨂r (c+1) (m-(c+1)) n j) ⨂ (⨂r m 1 n j) ⨂ (⨂r (m+1) (n-m) n j))"
   proof-
-    have "(CR_on_all c n m) * ((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (n-1) m j) 
-       ⨂ (pr (to_list_bound (c+1) (n-(c+1)) m j) (n-c-1)) 
-       ⨂ (pr (to_list_bound n 1 m j) 1) 
-       ⨂ (pr (to_list_bound (n+1) (m-n) m j) (m-n)))
-       =  (pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c n m j) 
-       ⨂ (pr (to_list_bound (c+1) (n-(c+1)) m j) (n-c-1))  
-       ⨂ (pr (to_list_bound n 1 m j) 1) 
-       ⨂ (pr (to_list_bound (n+1) (m-n) m j) (m-n))"
+    have "(CR_on_all c m n) * ((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (m-1) n j) 
+       ⨂ (pr (to_list_bound (c+1) (m-(c+1)) n j) (m-c-1)) 
+       ⨂ (pr (to_list_bound m 1 n j) 1) 
+       ⨂ (pr (to_list_bound (m+1) (n-m) n j) (n-m)))
+       =  (pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c m n j) 
+       ⨂ (pr (to_list_bound (c+1) (m-(c+1)) n j) (m-c-1))  
+       ⨂ (pr (to_list_bound m 1 n j) 1) 
+       ⨂ (pr (to_list_bound (m+1) (n-m) n j) (n-m))"
     proof-
-      have "2 ≤ n ∧ 1 ≤ m ∧ n ≤ m ∧ 1 ≤ c ∧ c ≤ n - 1 ∧ c ≤ m " using assms by simp
-      moreover have "dim_row (pr (to_list_bound n 1 m j) 1) = 2" 
-                and "dim_col (pr (to_list_bound n 1 m j) 1) = 1" using pow_tensor_length_1 
+      have "2 ≤ m ∧ 1 ≤ n ∧ m ≤ n ∧ 1 ≤ c ∧ c ≤ m - 1 ∧ c ≤ n" using assms by simp
+      moreover have "dim_row (pr (to_list_bound m 1 n j) 1) = 2" 
+                and "dim_col (pr (to_list_bound m 1 n j) 1) = 1" using pow_tensor_length_1 
         apply (metis add_left_cancel power_one_right to_tensor_prod_def to_tensor_prod_dim)
         using to_tensor_prod_def to_tensor_prod_dim by presburger
-      moreover have "length [psq (nat i) m m j. i<-[1..(c-1)]] = c-1" by simp
-      moreover have "(∀x ∈ set (to_list_bound (c+1) (n-(c+1)) m j). dim_row x = 2)" using to_list_bound_dim by simp
-      moreover have "(∀x ∈ set (to_list_bound (c+1) (n-(c+1)) m j). dim_col x = 1)" using to_list_bound_dim by simp
-      moreover have "length (to_list_bound (c+1) (n-(c+1)) m j) = n-c-1" by (simp add: to_list_bound_length)
-      moreover have "(∀y ∈ set (to_list_bound (n+1) (m-n) m j). dim_row y = 2)" using to_list_bound_dim by simp
-      moreover have "(∀y ∈ set (to_list_bound (n+1) (m-n) m j). dim_col y = 1)" using to_list_bound_dim by simp
-      moreover have "length (to_list_bound (n+1) (m-n) m j) = m-n" by (simp add: to_list_bound_length)
-      moreover have "(pr (to_list_bound n 1 m j) 1) = |zero⟩ ∨ (pr (to_list_bound n 1 m j) 1) = |one⟩" 
+      moreover have "length [psq (nat i) n n j. i<-[1..(c-1)]] = c-1" by simp
+      moreover have "(∀x ∈ set (to_list_bound (c+1) (m-(c+1)) n j). dim_row x = 2)" using to_list_bound_dim by simp
+      moreover have "(∀x ∈ set (to_list_bound (c+1) (m-(c+1)) n j). dim_col x = 1)" using to_list_bound_dim by simp
+      moreover have "length (to_list_bound (c+1) (m-(c+1)) n j) = m-c-1" by (simp add: to_list_bound_length)
+      moreover have "(∀y ∈ set (to_list_bound (m+1) (n-m) n j). dim_row y = 2)" using to_list_bound_dim by simp
+      moreover have "(∀y ∈ set (to_list_bound (m+1) (n-m) n j). dim_col y = 1)" using to_list_bound_dim by simp
+      moreover have "length (to_list_bound (m+1) (n-m) n j) = n-m" by (simp add: to_list_bound_length)
+      moreover have "(pr (to_list_bound m 1 n j) 1) = |zero⟩ ∨ (pr (to_list_bound m 1 n j) 1) = |one⟩" 
         using pow_tensor_length_1 by simp
-      moreover have "(pr (to_list_bound n 1 m j) 1) = |zero⟩ ⟶ bin_rep m j ! (n - 1) = 0" 
+      moreover have "(pr (to_list_bound m 1 n j) 1) = |zero⟩ ⟶ bin_rep n j ! (m - 1) = 0" 
         using to_tensor_bin_rep_zero to_tensor_prod_def assms by simp 
-      moreover have "(pr (to_list_bound n 1 m j) 1) = |one⟩ ⟶ bin_rep m j ! (n - 1) = 1" 
+      moreover have "(pr (to_list_bound m 1 n j) 1) = |one⟩ ⟶ bin_rep n j ! (m - 1) = 1" 
         using to_tensor_bin_rep_one to_tensor_prod_def assms(1-2) assms by simp 
-      moreover have "(∀c∈set (map (λi. psq (nat i) m m j) [1..int (c - 1)]). dim_row c = 2)"
+      moreover have "(∀c∈set (map (λi. psq (nat i) n n j) [1..int (c - 1)]). dim_row c = 2)"
         using phase_shifted_qubit_def by simp
       moreover have 
-        "(∀c∈set (map (λi. psq (nat i) m m j) [1..int (c - 1)]). dim_col c = 1)" 
+        "(∀c∈set (map (λi. psq (nat i) n n j) [1..int (c - 1)]). dim_col c = 1)" 
         using phase_shifted_qubit_def assms(7) by simp
       ultimately show ?thesis
-        using app_CR_on_all[of n m c "(pr (to_list_bound n 1 m j) 1)" j "(to_list_bound (c+1) (n-(c+1)) m j)"
-                                   "(to_list_bound (n+1) (m-n) m j)" "[psq (nat i) m m j. i<-[1..(c-1)]]"] 
+        using app_CR_on_all[of m n c "(pr (to_list_bound m 1 n j) 1)" j "(to_list_bound (c+1) (m-(c+1)) n j)"
+                                   "(to_list_bound (m+1) (n-m) n j)" "[psq (nat i) n n j. i<-[1..(c-1)]]"] 
         by blast   
     qed
-    then have "(CR_on_all c n m) * ((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (n-1) m j) 
-    ⨂ (pr (to_list_bound (c+1) (n-(c+1)) m j) (n-(c+1))) 
-    ⨂ (pr (to_list_bound n 1 m j) 1) 
-    ⨂ (pr (to_list_bound (n+1) (m-n) m j) (m-n)))
-    =  (pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c n m j) 
-    ⨂ (pr (to_list_bound (c+1) (n-(c+1)) m j) (n-(c+1)))  
-    ⨂ (pr (to_list_bound n 1 m j) 1) 
-    ⨂ (pr (to_list_bound (n+1) (m-n) m j) (m-n))" by auto
-    moreover have "(⨂r (c+1) (n-(c+1)) m j) = (pr (to_list_bound (c+1) (n-(c+1)) m j) (n-(c+1)))" 
+    then have "(CR_on_all c m n) * ((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (m-1) n j) 
+    ⨂ (pr (to_list_bound (c+1) (m-(c+1)) n j) (m-(c+1))) 
+    ⨂ (pr (to_list_bound m 1 n j) 1) 
+    ⨂ (pr (to_list_bound (m+1) (n-m) n j) (n-m)))
+    =  (pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c m n j) 
+    ⨂ (pr (to_list_bound (c+1) (m-(c+1)) n j) (m-(c+1)))  
+    ⨂ (pr (to_list_bound m 1 n j) 1) 
+    ⨂ (pr (to_list_bound (m+1) (n-m) n j) (n-m))" by auto
+    moreover have "(⨂r (c+1) (m-(c+1)) n j) = (pr (to_list_bound (c+1) (m-(c+1)) n j) (m-(c+1)))" 
       using to_tensor_prod_def by simp
-    moreover have "(⨂r n 1 m j) = (pr (to_list_bound n 1 m j) 1) " 
+    moreover have "(⨂r m 1 n j) = (pr (to_list_bound m 1 n j) 1) " 
       using to_tensor_prod_def by simp
-    moreover have "(⨂r (n+1) (m-n) m j) = (pr (to_list_bound (n+1) (m-n) m j) (m-n))"       
+    moreover have "(⨂r (m+1) (n-m) n j) = (pr (to_list_bound (m+1) (n-m) n j) (n-m))"       
       using to_tensor_prod_def by simp
     ultimately show ?thesis by auto
   qed
-ultimately have "(CR_on_all c n m) * ((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (n-1) m j) ⨂ (⨂r (c+1) (m-c) m j))
-=((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c n m j) ⨂ (⨂r (c+1) (n-(c+1)) m j) ⨂ (⨂r n 1 m j) ⨂ (⨂r (n+1) (m-n) m j))"
-  by auto
-then have "(CR_on_all c n m) * ((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (n-1) m j) ⨂ (⨂r (c+1) (m-c) m j))
-=((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c n m j) ⨂ ((⨂r (c+1) (n-(c+1)) m j) ⨂ (⨂r n 1 m j) ⨂ (⨂r (n+1) (m-n) m j)))"
-  using tensor_mat_is_assoc by simp
-then show "(CR_on_all c n m) * ((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (n-1) m j) ⨂ (⨂r (c+1) (m-c) m j))
-=((pr [psq (nat i) m m j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c n m j) ⨂ (⨂r (c+1) (m-c) m j))"
-  using f0 by simp
+  ultimately have "(CR_on_all c m n) * ((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (m-1) n j) ⨂ (⨂r (c+1) (n-c) n j))
+=((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c m n j) ⨂ (⨂r (c+1) (m-(c+1)) n j) ⨂ (⨂r m 1 n j) ⨂ (⨂r (m+1) (n-m) n j))"
+    by auto
+  then have "(CR_on_all c m n) * ((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (m-1) n j) ⨂ (⨂r (c+1) (n-c) n j))
+=((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c m n j) ⨂ ((⨂r (c+1) (m-(c+1)) n j) ⨂ (⨂r m 1 n j) ⨂ (⨂r (m+1) (n-m) n j)))"
+    using tensor_mat_is_assoc by simp
+  then show "(CR_on_all c m n) * ((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c (m-1) n j) ⨂ (⨂r (c+1) (n-c) n j))
+=((pr [psq (nat i) n n j. i<-[1..(c-1)]] (c-1)) ⨂ (psq c m n j) ⨂ (⨂r (c+1) (n-c) n j))"
+    using f0 by simp
 qed
 
 
