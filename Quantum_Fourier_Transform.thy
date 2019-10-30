@@ -2350,7 +2350,6 @@ next
       = ((pr [psq (nat i) n n j. i<-[1..c]] c) ⨂ (⨂r (c+1) (n-c) n j))"
     using assms by simp
 qed
-(*HL: I stopped here at the replacement of m's to n's. *)
 
 subsection ‹Extension of the Application of all Necessary Gates to all Qubits›
 
@@ -2360,11 +2359,11 @@ fun pow_mult :: "(complex Matrix.mat) list ⇒ nat ⇒ complex Matrix.mat" ("pm 
 
 lemma aux_pow_mult_dim:
   assumes "k ≥ 1"
-  shows "∀xs. length xs = k ∧ (∀x ∈ set xs. dim_row x = m ∧ dim_col x = m) ⟶ dim_row (pm xs k) = m ∧ dim_col (pm xs k) = m"
+  shows "∀xs. length xs = k ∧ (∀x ∈ set xs. dim_row x = n ∧ dim_col x = n) ⟶ dim_row (pm xs k) = n ∧ dim_col (pm xs k) = n"
 proof(rule Nat.nat_induct_at_least[of 1 k])
   show "k≥1" using assms by simp
 next
-  show "∀xs. length xs = 1 ∧ (∀x ∈ set xs. dim_row x = m ∧ dim_col x = n) ⟶ dim_row (pm xs 1) = n ∧ dim_col (pm xs 1) = n"
+  show "∀xs. length xs = 1 ∧ (∀x ∈ set xs. dim_row x = n ∧ dim_col x = n) ⟶ dim_row (pm xs 1) = n ∧ dim_col (pm xs 1) = n"
     by (metis One_nat_def cancel_comm_monoid_add_class.diff_cancel last_ConsL last_in_set length_0_conv length_tl list.exhaust_sel 
         pow_mult.simps(1) zero_neq_one)
 next
@@ -2448,112 +2447,112 @@ lemma pow_mult_decomp_left:
   using aux_pow_mult_decomp_left assms by simp
 
 lemma pow_mult_decomp_G:
-  assumes "k ≥ 1" and "k < m" 
-  shows "(pm [G (nat i) m. i<-[1..(Suc k)]] (Suc k)) = (G (Suc k) m) * (pm [G (nat i) m. i<-[1..k]] k)" 
+  assumes "k ≥ 1" and "k < n" 
+  shows "(pm [G (nat i) n. i<-[1..(Suc k)]] (Suc k)) = (G (Suc k) n) * (pm [G (nat i) n. i<-[1..k]] k)" 
 proof-
-  have "dim_row (G nat (int (Suc k)) m) = 2 ^ m ∧ dim_col (G nat (int (Suc k)) m) = 2 ^ m"
-    using G_dim[of "nat (int (Suc k))" m] assms by simp
-  moreover have "length (map (λi. G nat i m) [1..int k]) = k" by simp
-  moreover have "(∀y∈set (map (λi. G nat i m) [1..int k]). dim_row y = 2 ^ m ∧ dim_col y = 2 ^ m)" 
+  have "dim_row (G nat (int (Suc k)) n) = 2 ^ n ∧ dim_col (G nat (int (Suc k)) n) = 2 ^ n"
+    using G_dim[of "nat (int (Suc k))" n] assms by simp
+  moreover have "length (map (λi. G nat i n) [1..int k]) = k" by simp
+  moreover have "(∀y∈set (map (λi. G nat i n) [1..int k]). dim_row y = 2 ^ n ∧ dim_col y = 2 ^ n)" 
     using G_dim assms by auto
-  moreover have "[G (Suc k) m ] = [G (nat i) m. i<-[(Suc k)..(Suc k)]]" 
+  moreover have "[G (Suc k) n ] = [G (nat i) n. i<-[(Suc k)..(Suc k)]]" 
     by (metis Cons_eq_map_conv list.simps(8) nat_int upto_single)
-  moreover have "[G (nat i) m. i<-[1..(Suc k)]] = [G (nat i) m. i<-[1..k]] @ [G (Suc k) m ]"
+  moreover have "[G (nat i) n. i<-[1..(Suc k)]] = [G (nat i) n. i<-[1..k]] @ [G (Suc k) n ]"
     using calculation by (smt map_append of_nat_Suc of_nat_le_0_iff upto_split1)
-  ultimately show ?thesis using pow_mult_decomp_left[of k "G (nat (Suc k)) m" "2^m" "[G (nat i) m. i<-[1..k]]"] assms by auto
+  ultimately show ?thesis using pow_mult_decomp_left[of k "G (nat (Suc k)) n" "2^n" "[G (nat i) n. i<-[1..k]]"] assms by auto
 qed
 
 lemma all_G_is_gate:
-  assumes "1 ≤ k" and "1 ≤ m"
-  shows "k ≤ m ⟶ gate m (pm [G (nat i) m. i<-[1..k]] k)"
+  assumes "1 ≤ k" and "1 ≤ n"
+  shows "k ≤ n ⟶ gate n (pm [G (nat i) n. i<-[1..k]] k)"
 proof(rule Nat.nat_induct_at_least[of 1 k])
   show "1 ≤ k" using assms by simp
 next
-  show "1 ≤ m ⟶ gate m (pm [G (nat i) m. i<-[1..int 1]] 1)" using G_is_gate[of 1 m] assms by simp
+  show "1 ≤ n ⟶ gate n (pm [G (nat i) n. i<-[1..int 1]] 1)" using G_is_gate[of 1 n] assms by simp
 next
   fix k
-  assume IH: "k ≤ m ⟶ gate m (pm [G (nat i) m. i<-[1..int k]] k)"
+  assume IH: "k ≤ n ⟶ gate n (pm [G (nat i) n. i<-[1..int k]] k)"
      and a0: "k ≥ 1"
-  show "(Suc k) ≤ m ⟶ gate m (pm [G (nat i) m. i<-[1..int (Suc k)]] (Suc k))" 
+  show "(Suc k) ≤ n ⟶ gate n (pm [G (nat i) n. i<-[1..int (Suc k)]] (Suc k))" 
   proof
-    assume a1: "(Suc k) ≤ m"
-    have "(pm [G (nat i) m. i<-[1..(Suc k)]] (Suc k)) = G (nat (Suc k)) m * (pm [G (nat i) m. i<-[1..k]] k)" 
+    assume a1: "(Suc k) ≤ n"
+    have "(pm [G (nat i) n. i<-[1..(Suc k)]] (Suc k)) = G (nat (Suc k)) n * (pm [G (nat i) n. i<-[1..k]] k)" 
     proof-
-      have "dim_row (G nat (int (Suc k)) m) = 2 ^ m ∧ dim_col (G nat (int (Suc k)) m) = 2 ^ m"
-        using G_dim[of "nat (int (Suc k))" m] a1 by simp
-      moreover have "length (map (λi. G nat i m) [1..int k]) = k" by simp
-      moreover have "(∀y∈set (map (λi. G nat i m) [1..int k]). dim_row y = 2 ^ m ∧ dim_col y = 2 ^ m)" 
+      have "dim_row (G nat (int (Suc k)) n) = 2 ^ n ∧ dim_col (G nat (int (Suc k)) n) = 2 ^ n"
+        using G_dim[of "nat (int (Suc k))" n] a1 by simp
+      moreover have "length (map (λi. G nat i n) [1..int k]) = k" by simp
+      moreover have "(∀y∈set (map (λi. G nat i n) [1..int k]). dim_row y = 2 ^ n ∧ dim_col y = 2 ^ n)" 
         using G_dim a1 by auto
-      moreover have "[G (Suc k) m ] = [G (nat i) m. i<-[(Suc k)..(Suc k)]]" 
+      moreover have "[G (Suc k) n ] = [G (nat i) n. i<-[(Suc k)..(Suc k)]]" 
         by (metis Cons_eq_map_conv list.simps(8) nat_int upto_single)
-      moreover have "[G (nat i) m. i<-[1..(Suc k)]] = [G (nat i) m. i<-[1..k]] @ [G (Suc k) m ]"
+      moreover have "[G (nat i) n. i<-[1..(Suc k)]] = [G (nat i) n. i<-[1..k]] @ [G (Suc k) n ]"
         using calculation by (smt map_append of_nat_Suc of_nat_le_0_iff upto_split1)
-      ultimately show ?thesis using pow_mult_decomp_left[of k "G (nat (Suc k)) m" "2^m" "[G (nat i) m. i<-[1..k]]"] a0 by simp
+      ultimately show ?thesis using pow_mult_decomp_left[of k "G (nat (Suc k)) n" "2^n" "[G (nat i) n. i<-[1..k]]"] a0 by simp
     qed
-    moreover have "gate m (G (nat (Suc k)) m)" using G_is_gate[of "Suc k" m] a0 a1 by (simp add: G_is_gate)
-    ultimately show "gate m (pm [G (nat i) m. i<-[1..int (Suc k)]] (Suc k))" 
+    moreover have "gate n (G (nat (Suc k)) n)" using G_is_gate[of "Suc k" n] a0 a1 by (simp add: G_is_gate)
+    ultimately show "gate n (pm [G (nat i) n. i<-[1..int (Suc k)]] (Suc k))" 
       by (simp add: IH Suc_leD a1 prod_of_gate_is_gate)
   qed
 qed
 
 lemma app_all_G: 
-  assumes "k ≥ 1" and "j < 2^m" and "m ≥ 1"
-  shows "k ≤ m ⟶ (pm [G (nat i) m. i<-[1..k]] k) * (⨂r 1 m m j)
-      = ((pr [psq (nat i) m m j. i<-[1..k]] k) ⨂ (⨂r (k+1) (m-k) m j))" 
+  assumes "k ≥ 1" and "j < 2^n" and "n ≥ 1"
+  shows "k ≤ n ⟶ (pm [G (nat i) n. i<-[1..k]] k) * (⨂r 1 n n j)
+      = ((pr [psq (nat i) n n j. i<-[1..k]] k) ⨂ (⨂r (k+1) (n-k) n j))" 
 proof(rule Nat.nat_induct_at_least[of 1 k])
   show "k ≥ 1" using assms by simp
 next
-  show "1 ≤ m ⟶(pm [G (nat i) m. i<-[1..int 1]] 1) * (⨂r 1 m m j)
-      = ((pr [psq (nat i) m m j. i<-[1..int 1]] 1) ⨂ (⨂r (1+1) (m-1) m j))" 
+  show "1 ≤ n ⟶(pm [G (nat i) n. i<-[1..int 1]] 1) * (⨂r 1 n n j)
+      = ((pr [psq (nat i) n n j. i<-[1..int 1]] 1) ⨂ (⨂r (1+1) (n-1) n j))" 
   proof
-    assume "1 ≤ m" 
-    have "(pm [G (nat i) m. i<-[1..int 1]] 1) * (⨂r 1 m m j) = (G 1 m) * (⨂r 1 m m j)"
+    assume "1 ≤ n" 
+    have "(pm [G (nat i) n. i<-[1..int 1]] 1) * (⨂r 1 n n j) = (G 1 n) * (⨂r 1 n n j)"
      by simp
-    moreover have "(⨂r 1 m m j) = ((pr [psq (nat i) m m j. i<-[1..(1-1)]] (1-1)) ⨂ (⨂r 1 (m-1+1) m j))" 
+    moreover have "(⨂r 1 n n j) = ((pr [psq (nat i) n n j. i<-[1..(1-1)]] (1-1)) ⨂ (⨂r 1 (n-1+1) n j))" 
     proof-
-      have "(pr [psq (nat i) m m j. i<-[1..(1-1)]] (1-1)) = (Id 0)" by simp
-      moreover have "(⨂r 1 m m j) = (⨂r 1 (m-1+1) m j)" using assms by simp
+      have "(pr [psq (nat i) n n j. i<-[1..(1-1)]] (1-1)) = (Id 0)" by simp
+      moreover have "(⨂r 1 n n j) = (⨂r 1 (n-1+1) n j)" using assms by simp
       ultimately show ?thesis using Id_left_tensor by simp
     qed
-    moreover have "G 1 m * ((pr [psq (nat i) m m j. i<-[1..(1-1)]] (1-1)) ⨂ (⨂r 1 (m-1+1) m j))
-       = ((pr [psq (nat i) m m j. i<-[1..1]] 1) ⨂ (⨂r (1+1) (m-1) m j))"
-      using app_G[of 1 m j] assms by simp 
-    ultimately show "(pm [G (nat i) m. i<-[1..int 1]] 1) * (⨂r 1 m m j)
-      = ((pr [psq (nat i) m m j. i<-[1..int 1]] 1) ⨂ (⨂r (1+1) (m-1) m j))" by simp
+    moreover have "G 1 n * ((pr [psq (nat i) n n j. i<-[1..(1-1)]] (1-1)) ⨂ (⨂r 1 (n-1+1) n j))
+       = ((pr [psq (nat i) n n j. i<-[1..1]] 1) ⨂ (⨂r (1+1) (n-1) n j))"
+      using app_G[of 1 n j] assms by simp 
+    ultimately show "(pm [G (nat i) n. i<-[1..int 1]] 1) * (⨂r 1 n n j)
+      = ((pr [psq (nat i) n n j. i<-[1..int 1]] 1) ⨂ (⨂r (1+1) (n-1) n j))" by simp
  qed
 next
   fix k::nat
   assume a0: "k ≥ 1"
-  assume IH: "k ≤ m ⟶(pm [G (nat i) m. i<-[1..k]] k) * (⨂r 1 m m j)
-            = ((pr [psq (nat i) m m j. i<-[1..k]] k) ⨂ (⨂r (k+1) (m-k) m j))" 
-  show  "(Suc k) ≤ m ⟶ (pm [G (nat i) m. i<-[1..(Suc k)]] (Suc k)) * (⨂r 1 m m j)
-       = ((pr [psq (nat i) m m j. i<-[1..(Suc k)]] (Suc k)) ⨂ (⨂r ((Suc k)+1) (m-(Suc k)) m j))" 
+  assume IH: "k ≤ n ⟶(pm [G (nat i) n. i<-[1..k]] k) * (⨂r 1 n n j)
+            = ((pr [psq (nat i) n n j. i<-[1..k]] k) ⨂ (⨂r (k+1) (n-k) n j))" 
+  show  "(Suc k) ≤ n ⟶ (pm [G (nat i) n. i<-[1..(Suc k)]] (Suc k)) * (⨂r 1 n n j)
+       = ((pr [psq (nat i) n n j. i<-[1..(Suc k)]] (Suc k)) ⨂ (⨂r ((Suc k)+1) (n-(Suc k)) n j))" 
   proof
-    assume a1: "(Suc k) ≤ m"
-    then have "(pm [G (nat i) m. i<-[1..int (Suc k)]] (Suc k)) * (⨂r 1 m m j)
-             = ((G (Suc k) m) * (pm [G (nat i) m. i<-[1..int k]] k)) * (⨂r 1 m m j)"
-      using a0 pow_mult_decomp_G[of k m] by simp
-    moreover have "((G (Suc k) m) * (pm [G (nat i) m. i<-[1..int k]] k)) * (⨂r 1 m m j)
-                 = (G (Suc k) m) * ((pm [G (nat i) m. i<-[1..int k]] k) * (⨂r 1 m m j))"
+    assume a1: "(Suc k) ≤ n"
+    then have "(pm [G (nat i) n. i<-[1..int (Suc k)]] (Suc k)) * (⨂r 1 n n j)
+             = ((G (Suc k) n) * (pm [G (nat i) n. i<-[1..int k]] k)) * (⨂r 1 n n j)"
+      using a0 pow_mult_decomp_G[of k n] by simp
+    moreover have "((G (Suc k) n) * (pm [G (nat i) n. i<-[1..int k]] k)) * (⨂r 1 n n j)
+                 = (G (Suc k) n) * ((pm [G (nat i) n. i<-[1..int k]] k) * (⨂r 1 n n j))"
     proof-
-      have "length [G (nat i) m. i<-[1..int k]] = k" by simp
-      moreover have "∀x∈set (map (λi. G nat i m) [1..int k]). dim_row x = 2^m ∧ dim_col x = 2^m" 
+      have "length [G (nat i) n. i<-[1..int k]] = k" by simp
+      moreover have "∀x∈set (map (λi. G nat i n) [1..int k]). dim_row x = 2^n ∧ dim_col x = 2^n" 
         using G_dim a0 a1 by auto
-      ultimately have "(pm [G (nat i) m. i<-[1..int k]] k) ∈ carrier_mat (2^m) (2^m)" 
-        using a0 pow_mult_dim[of k "[G (nat i) m. i<-[1..int k]]" "2^m"] by auto
-      moreover have "(G (Suc k) m) ∈ carrier_mat (2^m) (2^m)" 
-        using G_dim[of "Suc k" m] a1 a0 le_SucI by blast
-      moreover have "(⨂r 1 m m j) ∈ carrier_mat (2^m) 1" using to_tensor_prod_dim[of 1 m m j] by auto
+      ultimately have "(pm [G (nat i) n. i<-[1..int k]] k) ∈ carrier_mat (2^n) (2^n)" 
+        using a0 pow_mult_dim[of k "[G (nat i) n. i<-[1..int k]]" "2^n"] by auto
+      moreover have "(G (Suc k) n) ∈ carrier_mat (2^n) (2^n)" 
+        using G_dim[of "Suc k" n] a1 a0 le_SucI by blast
+      moreover have "(⨂r 1 n n j) ∈ carrier_mat (2^n) 1" using to_tensor_prod_dim[of 1 n n j] by auto
       ultimately show ?thesis by simp
     qed
-    ultimately have "(pm [G (nat i) m. i<-[1..int (Suc k)]] (Suc k)) * (⨂r 1 m m j)
-             = (G (Suc k) m) * ((pm [G (nat i) m. i<-[1..int k]] k) * (⨂r 1 m m j))" by auto
-    then have  "(pm [G (nat i) m. i<-[1..int (Suc k)]] (Suc k)) * (⨂r 1 m m j)
-            = (G (Suc k) m) * ((pr [psq (nat i) m m j. i<-[1..k]] k) ⨂ (⨂r (k+1) (m-k) m j))"
+    ultimately have "(pm [G (nat i) n. i<-[1..int (Suc k)]] (Suc k)) * (⨂r 1 n n j)
+             = (G (Suc k) n) * ((pm [G (nat i) n. i<-[1..int k]] k) * (⨂r 1 n n j))" by auto
+    then have  "(pm [G (nat i) n. i<-[1..int (Suc k)]] (Suc k)) * (⨂r 1 n n j)
+            = (G (Suc k) n) * ((pr [psq (nat i) n n j. i<-[1..k]] k) ⨂ (⨂r (k+1) (n-k) n j))"
       using IH a1 by auto
-    then show "(pm [G (nat i) m. i<-[1..int (Suc k)]] (Suc k)) * (⨂r 1 m m j)
-            = ((pr [psq (nat i) m m j. i<-[1..int (Suc k)]] (Suc k)) ⨂ (⨂r ((Suc k)+1) (m-(Suc k)) m j))"
-      using app_G[of "Suc k" m j] assms a0 a1 by simp
+    then show "(pm [G (nat i) n. i<-[1..int (Suc k)]] (Suc k)) * (⨂r 1 n n j)
+            = ((pr [psq (nat i) n n j. i<-[1..int (Suc k)]] (Suc k)) ⨂ (⨂r ((Suc k)+1) (n-(Suc k)) n j))"
+      using app_G[of "Suc k" n j] assms a0 a1 by simp
   qed
 qed
 
@@ -2561,126 +2560,126 @@ qed
 subsection ‹Reversing the Qubits›
 
 fun reverse_qubits:: "nat ⇒ nat ⇒ complex Matrix.mat" ("rQB _ _" 75) where
-  "(rQB 0 m) = (Id m)" 
-| "(rQB (Suc k) m) = fSWAP (Suc k) (m-(Suc k)) * rQB k m"
+  "(rQB 0 n) = (Id n)" 
+| "(rQB (Suc k) n) = fSWAP (Suc k) (n-(Suc k)) * rQB k n"
 
 lemma reverse_qubits_dim[simp]:
-  shows "k ≤ m ⟶ dim_row (rQB k m) = 2^m ∧ dim_col (rQB k m) = 2^m" 
+  shows "k ≤ n ⟶ dim_row (rQB k n) = 2^n ∧ dim_col (rQB k n) = 2^n" 
 proof(induction k)
-  show "0 ≤ m ⟶ dim_row (rQB 0 m) = 2^m ∧ dim_col (rQB 0 m) = 2^m" using Id_def by simp
+  show "0 ≤ n ⟶ dim_row (rQB 0 n) = 2^n ∧ dim_col (rQB 0 n) = 2^n" using Id_def by simp
 next
   fix k::nat
-  assume IH: "k ≤ m ⟶ dim_row (rQB k m) = 2^m ∧ dim_col (rQB k m) = 2^m" 
-  show "(Suc k) ≤ m ⟶ dim_row (rQB (Suc k) m) = 2^m ∧ dim_col (rQB (Suc k) m) = 2^m" 
+  assume IH: "k ≤ n ⟶ dim_row (rQB k n) = 2^n ∧ dim_col (rQB k n) = 2^n" 
+  show "(Suc k) ≤ n ⟶ dim_row (rQB (Suc k) n) = 2^n ∧ dim_col (rQB (Suc k) n) = 2^n" 
   proof
-    assume a0: "(Suc k) ≤ m"
-    then have "dim_row (rQB (Suc k) m) = 2^m" using SWAP_front_dim[of "Suc k" "m-(Suc k)"] by simp
-    moreover have "dim_col (rQB (Suc k) m) = 2^m" using a0 IH by simp
-    ultimately show "dim_row (rQB (Suc k) m) = 2^m ∧ dim_col (rQB (Suc k) m) = 2^m" by simp
+    assume a0: "(Suc k) ≤ n"
+    then have "dim_row (rQB (Suc k) n) = 2^n" using SWAP_front_dim[of "Suc k" "n-(Suc k)"] by simp
+    moreover have "dim_col (rQB (Suc k) n) = 2^n" using a0 IH by simp
+    ultimately show "dim_row (rQB (Suc k) n) = 2^n ∧ dim_col (rQB (Suc k) n) = 2^n" by simp
   qed
 qed
 
 lemma reverse_qubits_is_gate:
-  shows "k ≤ m ⟶ gate m (rQB k m)"
+  shows "k ≤ n ⟶ gate n (rQB k n)"
 proof(induction k)
-  show "0 ≤ m ⟶ gate m (rQB 0 m)" by simp
+  show "0 ≤ n ⟶ gate n (rQB 0 n)" by simp
 next
   fix k
-  assume IH: "k ≤ m ⟶ gate m (rQB k m)"
-  moreover have "(Suc k) ≤ m ⟶ gate m (fSWAP (Suc k) (m-(Suc k)))" 
+  assume IH: "k ≤ n ⟶ gate n (rQB k n)"
+  moreover have "(Suc k) ≤ n ⟶ gate n (fSWAP (Suc k) (n-(Suc k)))" 
     using SWAP_front_gate 
     by (metis le_add1 ordered_cancel_comm_monoid_diff_class.add_diff_inverse plus_1_eq_Suc)
-  ultimately show "(Suc k) ≤ m ⟶ gate m (rQB (Suc k) m)"
+  ultimately show "(Suc k) ≤ n ⟶ gate n (rQB (Suc k) n)"
     using prod_of_gate_is_gate by simp
 qed
 
 lemma app_reverse_qubits:
-  shows "i ≤ m ⟶ (rQB i m) * (pr [psq (nat k) m m j. k<-[1..m]] m) 
-       = (pr (rev [psq (nat k) m m j. k<-[1..i]]) i) ⨂ (pr [psq (nat k) m m j. k<-[i+1..m]] (m-i))"
+  shows "i ≤ n ⟶ (rQB i n) * (pr [psq (nat k) n n j. k<-[1..n]] n) 
+       = (pr (rev [psq (nat k) n n j. k<-[1..i]]) i) ⨂ (pr [psq (nat k) n n j. k<-[i+1..n]] (n-i))"
 proof(induction i)
-  have "(rQB 0 m) * (pr [psq (nat k) m m j. k<-[1..int m]] m) 
-      = (Id m) * (pr [psq (nat k) m m j. k<-[1..int m]] m)" by simp
-  moreover have "dim_row (pr [psq (nat k) m m j. k<-[1..int m]] m) = 2^m" 
-    using pow_tensor_list_dim_row[of "[psq (nat k) m m j. k<-[1..int m]]" m 2] phase_shifted_qubit_def by simp 
-  ultimately have "(rQB 0 m) * (pr [psq (nat k) m m j. k<-[1..int m]] m) 
-       = (pr [psq (nat k) m m j. k<-[1..int m]] m)" by simp
-  moreover have "(pr (rev [psq (nat k) m m j. k<-[1..int 0]]) 0) = (Id 0)" by simp
-  ultimately show "0 ≤ m ⟶ (rQB 0 m) * (pr [psq (nat k) m m j. k<-[1..int m]] m) 
-       = (pr (rev [psq (nat k) m m j. k<-[1..int 0]]) 0) ⨂ (pr [psq (nat k) m m j. k<-[int (0+1)..int m]] (m-0))" by simp
+  have "(rQB 0 n) * (pr [psq (nat k) n n j. k<-[1..int n]] n) 
+      = (Id n) * (pr [psq (nat k) n n j. k<-[1..int n]] n)" by simp
+  moreover have "dim_row (pr [psq (nat k) n n j. k<-[1..int n]] n) = 2^n" 
+    using pow_tensor_list_dim_row[of "[psq (nat k) n n j. k<-[1..int n]]" n 2] phase_shifted_qubit_def by simp 
+  ultimately have "(rQB 0 n) * (pr [psq (nat k) n n j. k<-[1..int n]] n) 
+       = (pr [psq (nat k) n n j. k<-[1..int n]] n)" by simp
+  moreover have "(pr (rev [psq (nat k) n n j. k<-[1..int 0]]) 0) = (Id 0)" by simp
+  ultimately show "0 ≤ n ⟶ (rQB 0 n) * (pr [psq (nat k) n n j. k<-[1..int n]] n) 
+       = (pr (rev [psq (nat k) n n j. k<-[1..int 0]]) 0) ⨂ (pr [psq (nat k) n n j. k<-[int (0+1)..int n]] (n-0))" by simp
 next
   fix i::nat
-  assume IH: "i ≤ m ⟶ (rQB i m) * (pr [psq (nat k) m m j. k<-[1..int m]] m) 
-       = (pr (rev [psq (nat k) m m j. k<-[1..int i]]) i) ⨂ (pr [psq (nat k) m m j. k<-[int (i+1)..int m]] (m-i))"
-  show "(Suc i) ≤ m ⟶ (rQB (Suc i) m) * (pr [psq (nat k) m m j. k<-[1..int m]] m) 
-      = (pr (rev [psq (nat k) m m j. k<-[1..int (Suc i)]]) (Suc i)) ⨂ (pr [psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]] (m-(Suc i)))"
+  assume IH: "i ≤ n ⟶ (rQB i n) * (pr [psq (nat k) n n j. k<-[1..int n]] n) 
+       = (pr (rev [psq (nat k) n n j. k<-[1..int i]]) i) ⨂ (pr [psq (nat k) n n j. k<-[int (i+1)..int n]] (n-i))"
+  show "(Suc i) ≤ n ⟶ (rQB (Suc i) n) * (pr [psq (nat k) n n j. k<-[1..int n]] n) 
+      = (pr (rev [psq (nat k) n n j. k<-[1..int (Suc i)]]) (Suc i)) ⨂ (pr [psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]] (n-(Suc i)))"
   proof
-    assume a0: "(Suc i) ≤ m"
-    have "(rQB (Suc i) m) * (pr [psq (nat k) m m j. k<-[1..int m]] m) 
-        = (fSWAP (Suc i) (m-(Suc i)) * rQB i m) * (pr [psq (nat k) m m j. k<-[1..int m]] m)" by simp
-    moreover have "(fSWAP (Suc i) (m-(Suc i))) ∈ carrier_mat (2^m) (2^m)"  using SWAP_front_dim[of "Suc i" "m-(Suc i)"] a0 by auto
-    moreover have "(rQB i m) ∈ carrier_mat (2^m) (2^m)" using reverse_qubits_dim a0 by auto
-    moreover have "(pr [psq (nat k) m m j. k<-[1..int m]] m) ∈ carrier_mat (2^m) 1" 
-      using pow_tensor_list_dim_row[of "[psq (nat k) m m j. k<-[1..int m]]" m 2]   
-            pow_tensor_list_dim_col[of "[psq (nat k) m m j. k<-[1..int m]]" m] phase_shifted_qubit_def by auto
-    ultimately have "(rQB (Suc i) m) * (pr [psq (nat k) m m j. k<-[1..int m]] m) 
-       = fSWAP (Suc i) (m-(Suc i)) * (rQB i m * (pr [psq (nat k) m m j. k<-[1..int m]] m))" by simp
-    then have "(rQB (Suc i) m) * (pr [psq (nat k) m m j. k<-[1..int m]] m) 
-       = fSWAP (Suc i) (m-(Suc i)) * ((pr (rev [psq (nat k) m m j. k<-[1..int i]]) i) ⨂ (pr [psq (nat k) m m j. k<-[int (i+1)..int m]] (m-i)))" 
+    assume a0: "(Suc i) ≤ n"
+    have "(rQB (Suc i) n) * (pr [psq (nat k) n n j. k<-[1..int n]] n) 
+        = (fSWAP (Suc i) (n-(Suc i)) * rQB i n) * (pr [psq (nat k) n n j. k<-[1..int n]] n)" by simp
+    moreover have "(fSWAP (Suc i) (n-(Suc i))) ∈ carrier_mat (2^n) (2^n)"  using SWAP_front_dim[of "Suc i" "n-(Suc i)"] a0 by auto
+    moreover have "(rQB i n) ∈ carrier_mat (2^n) (2^n)" using reverse_qubits_dim a0 by auto
+    moreover have "(pr [psq (nat k) n n j. k<-[1..int n]] n) ∈ carrier_mat (2^n) 1" 
+      using pow_tensor_list_dim_row[of "[psq (nat k) n n j. k<-[1..int n]]" n 2]   
+            pow_tensor_list_dim_col[of "[psq (nat k) n n j. k<-[1..int n]]" n] phase_shifted_qubit_def by auto
+    ultimately have "(rQB (Suc i) n) * (pr [psq (nat k) n n j. k<-[1..int n]] n) 
+       = fSWAP (Suc i) (n-(Suc i)) * (rQB i n * (pr [psq (nat k) n n j. k<-[1..int n]] n))" by simp
+    then have "(rQB (Suc i) n) * (pr [psq (nat k) n n j. k<-[1..int n]] n) 
+       = fSWAP (Suc i) (n-(Suc i)) * ((pr (rev [psq (nat k) n n j. k<-[1..int i]]) i) ⨂ (pr [psq (nat k) n n j. k<-[int (i+1)..int n]] (n-i)))" 
       using IH a0 by simp
-    moreover have "(pr [psq (nat k) m m j. k<-[int (i+1)..int m]] (m-i))
-                = psq (nat (i+1)) m m j ⨂ (pr [psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]] (m-i-1))" 
+    moreover have "(pr [psq (nat k) n n j. k<-[int (i+1)..int n]] (n-i))
+                = psq (nat (i+1)) n n j ⨂ (pr [psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]] (n-i-1))" 
     proof-
-      have "length (map (λk. psq (nat k) m m j) [int ((Suc i)+1)..int m]) = m - i - 1" 
+      have "length (map (λk. psq (nat k) n n j) [int ((Suc i)+1)..int n]) = n - i - 1" 
         using a0 by simp
-      then have "psq (nat (i+1)) m m j ⨂ (pr [psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]] (m-i-1))
-          = (pr (psq (nat (i+1)) m m j # [psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]]) (m-i-1+1))"
-        using pow_tensor_decomp_right[of "[psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]]" "m-i-1" "psq (nat (i+1)) m m j"] by simp
-      moreover have "psq (nat (i+1)) m m j # [psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]]
-          = [psq (nat k) m m j. k<-[int (Suc i)..int m]]" using a0 upto_rec1 by simp
-      ultimately have "psq (nat (i+1)) m m j ⨂ (pr [psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]] (m-i-1))
-          = (pr [psq (nat k) m m j. k<-[int (Suc i)..int m]] (m-i-1+1))" by auto
+      then have "psq (nat (i+1)) n n j ⨂ (pr [psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]] (n-i-1))
+          = (pr (psq (nat (i+1)) n n j # [psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]]) (n-i-1+1))"
+        using pow_tensor_decomp_right[of "[psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]]" "n-i-1" "psq (nat (i+1)) n n j"] by simp
+      moreover have "psq (nat (i+1)) n n j # [psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]]
+          = [psq (nat k) n n j. k<-[int (Suc i)..int n]]" using a0 upto_rec1 by simp
+      ultimately have "psq (nat (i+1)) n n j ⨂ (pr [psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]] (n-i-1))
+          = (pr [psq (nat k) n n j. k<-[int (Suc i)..int n]] (n-i-1+1))" by auto
       then show ?thesis 
         by (metis (mono_tags, lifting) Suc_diff_le Suc_eq_plus1 a0 diff_Suc_Suc diff_diff_left)
     qed
-    ultimately have "(rQB (Suc i) m) * (pr [psq (nat k) m m j. k<-[1..int m]] m) 
-= fSWAP (Suc i) (m-(Suc i)) * ((pr (rev [psq (nat k) m m j. k<-[1..int i]]) i) ⨂ psq (nat (i+1)) m m j ⨂ (pr [psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]] (m-i-1)))" 
+    ultimately have "(rQB (Suc i) n) * (pr [psq (nat k) n n j. k<-[1..int n]] n) 
+= fSWAP (Suc i) (n-(Suc i)) * ((pr (rev [psq (nat k) n n j. k<-[1..int i]]) i) ⨂ psq (nat (i+1)) n n j ⨂ (pr [psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]] (n-i-1)))" 
       using tensor_mat_is_assoc by simp
-    moreover have "fSWAP (Suc i-0) (m-(Suc i)) *
-((pr (rev [psq (nat k) m m j. k<-[1..int i]]) (Suc i - 0 - 1)) ⨂ psq (nat (i+1)) m m j ⨂ (pr [psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]] (m-(Suc i))))
-= psq (nat (i+1)) m m j ⨂ (pr (rev [psq (nat k) m m j. k<-[1..int i]]) (Suc i - 0 - 1)) ⨂ (pr [psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]] (m-(Suc i)))"
+    moreover have "fSWAP (Suc i-0) (n-(Suc i)) *
+((pr (rev [psq (nat k) n n j. k<-[1..int i]]) (Suc i - 0 - 1)) ⨂ psq (nat (i+1)) n n j ⨂ (pr [psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]] (n-(Suc i))))
+= psq (nat (i+1)) n n j ⨂ (pr (rev [psq (nat k) n n j. k<-[1..int i]]) (Suc i - 0 - 1)) ⨂ (pr [psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]] (n-(Suc i)))"
     proof-
       have "0 + 1 ≤ Suc i" by simp
       moreover have "1 ≤ Suc i" by simp
-      moreover have " length (rev [psq (nat k) m m j. k<-[1..int i]]) = Suc i - 0 - 1" by simp
-      moreover have " length [psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]] = m - Suc i" by simp
-      moreover have "∀y∈set (map (λk. psq (nat k) m m j) [int (Suc i + 1)..int m]). dim_col y = 1" using phase_shifted_qubit_def by simp
-      moreover have "∀x∈set (rev (map (λk. psq (nat k) m m j) [1..int i])). dim_col x = 1" using phase_shifted_qubit_def by simp
-      moreover have "∀y∈set (map (λk. psq (nat k) m m j) [int (Suc i + 1)..int m]). dim_row y = 2" using phase_shifted_qubit_def by simp
-      moreover have "∀x∈set (rev (map (λk. psq (nat k) m m j) [1..int i])). dim_row x = 2 " using phase_shifted_qubit_def by simp
-      moreover have "dim_col (psq (nat (int (i + 1))) m m j) = 1" using phase_shifted_qubit_def by simp
-      moreover have "dim_row (psq (nat (int (i + 1))) m m j) = 2" using phase_shifted_qubit_def by simp
-      moreover have "Suc i ≤ m" using a0 by auto
+      moreover have " length (rev [psq (nat k) n n j. k<-[1..int i]]) = Suc i - 0 - 1" by simp
+      moreover have " length [psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]] = n - Suc i" by simp
+      moreover have "∀y∈set (map (λk. psq (nat k) n n j) [int (Suc i + 1)..int n]). dim_col y = 1" using phase_shifted_qubit_def by simp
+      moreover have "∀x∈set (rev (map (λk. psq (nat k) n n j) [1..int i])). dim_col x = 1" using phase_shifted_qubit_def by simp
+      moreover have "∀y∈set (map (λk. psq (nat k) n n j) [int (Suc i + 1)..int n]). dim_row y = 2" using phase_shifted_qubit_def by simp
+      moreover have "∀x∈set (rev (map (λk. psq (nat k) n n j) [1..int i])). dim_row x = 2 " using phase_shifted_qubit_def by simp
+      moreover have "dim_col (psq (nat (int (i + 1))) n n j) = 1" using phase_shifted_qubit_def by simp
+      moreover have "dim_row (psq (nat (int (i + 1))) n n j) = 2" using phase_shifted_qubit_def by simp
+      moreover have "Suc i ≤ n" using a0 by auto
       ultimately show ?thesis 
-        using app_SWAP_front[of 0 "Suc i" m "psq (nat (i+1)) m m j" "(rev [psq (nat k) m m j. k<-[1..int i]])" 
-                       "[psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]]"] tensor_mat_is_assoc a0 by auto
+        using app_SWAP_front[of 0 "Suc i" n "psq (nat (i+1)) n n j" "(rev [psq (nat k) n n j. k<-[1..int i]])" 
+                       "[psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]]"] tensor_mat_is_assoc a0 by auto
     qed
-    ultimately have "(rQB (Suc i) m) * (pr [psq (nat k) m m j. k<-[1..int m]] m) 
-= (psq (nat (i+1)) m m j ⨂ (pr (rev [psq (nat k) m m j. k<-[1..int i]]) i) ⨂ (pr [psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]] (m-i-1)))" 
+    ultimately have "(rQB (Suc i) n) * (pr [psq (nat k) n n j. k<-[1..int n]] n) 
+= (psq (nat (i+1)) n n j ⨂ (pr (rev [psq (nat k) n n j. k<-[1..int i]]) i) ⨂ (pr [psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]] (n-i-1)))" 
       by simp
-    moreover have "psq (nat (i+1)) m m j ⨂ (pr (rev [psq (nat k) m m j. k<-[1..int i]]) i)
-                 = pr (rev [psq (nat k) m m j. k<-[1..int (Suc i)]]) (Suc i)"
+    moreover have "psq (nat (i+1)) n n j ⨂ (pr (rev [psq (nat k) n n j. k<-[1..int i]]) i)
+                 = pr (rev [psq (nat k) n n j. k<-[1..int (Suc i)]]) (Suc i)"
     proof-
-      have "psq (nat (i+1)) m m j # (rev [psq (nat k) m m j. k<-[1..int i]])
-          = rev (([psq (nat k) m m j. k<-[1..int i]]) @ [psq (nat (i+1)) m m j])" 
+      have "psq (nat (i+1)) n n j # (rev [psq (nat k) n n j. k<-[1..int i]])
+          = rev (([psq (nat k) n n j. k<-[1..int i]]) @ [psq (nat (i+1)) n n j])" 
         by simp
-      moreover have "[psq (nat k) m m j. k<-[1..int i]] @ [psq (nat (i+1)) m m j] = [psq (nat k) m m j. k<-[1..int (i+1)]]" 
+      moreover have "[psq (nat k) n n j. k<-[1..int i]] @ [psq (nat (i+1)) n n j] = [psq (nat k) n n j. k<-[1..int (i+1)]]" 
         by (simp add: upto_rec2)
-      moreover have "length [psq (nat k) m m j. k<-[1..int i]] = i" by simp
-      ultimately show ?thesis using pow_tensor_decomp_right[of "[psq (nat k) m m j. k<-[1..int i]]" i "psq (nat (i+1)) m m j "]
+      moreover have "length [psq (nat k) n n j. k<-[1..int i]] = i" by simp
+      ultimately show ?thesis using pow_tensor_decomp_right[of "[psq (nat k) n n j. k<-[1..int i]]" i "psq (nat (i+1)) n n j "]
         by (metis Suc_eq_plus1 pow_tensor_list.simps(2))
     qed
-    ultimately show "(rQB (Suc i) m) * (pr [psq (nat k) m m j. k<-[1..int m]] m) 
-       = (pr (rev [psq (nat k) m m j. k<-[1..int (Suc i)]]) (Suc i)) ⨂ (pr [psq (nat k) m m j. k<-[int ((Suc i)+1)..int m]] (m-(Suc i)))"
+    ultimately show "(rQB (Suc i) n) * (pr [psq (nat k) n n j. k<-[1..int n]] n) 
+       = (pr (rev [psq (nat k) n n j. k<-[1..int (Suc i)]]) (Suc i)) ⨂ (pr [psq (nat k) n n j. k<-[int ((Suc i)+1)..int n]] (n-(Suc i)))"
     by simp
   qed
 qed
@@ -2689,35 +2688,35 @@ qed
 subsection ‹The Quantum Fourier Transform›
 
 definition quantum_fourier_transform :: "nat⇒complex Matrix.mat" ("QFT _" 75) where 
-"(QFT m) = (rQB m m) * (pm [G (nat i) m. i<-[1..m]] m)"
+"(QFT n) = (rQB n n) * (pm [G (nat i) n. i<-[1..n]] n)"
 
 lemma quantum_fourier_transform_is_gate:
-  assumes "1 ≤ m"
-  shows "gate m (QFT m)"
+  assumes "1 ≤ n"
+  shows "gate n (QFT n)"
 proof-
-  have "gate m (rQB m m)" using reverse_qubits_is_gate by simp
-  moreover have "gate m (pm [G (nat i) m. i<-[1..m]] m)" using all_G_is_gate[of m m] assms by simp
+  have "gate n (rQB n n)" using reverse_qubits_is_gate by simp
+  moreover have "gate n (pm [G (nat i) n. i<-[1..n]] n)" using all_G_is_gate[of n n] assms by simp
   ultimately show ?thesis using prod_of_gate_is_gate quantum_fourier_transform_def by simp
 qed
 
 abbreviation ψ⇩1 :: "nat ⇒ nat ⇒ complex Matrix.mat" where
-  "ψ⇩1 m j ≡ pr [psq (nat k) m m j. k<-[1..m] ] m"
+  "ψ⇩1 n j ≡ pr [psq (nat k) n n j. k<-[1..n] ] n"
 
 lemma aux_quantum_fourier_transform_prod_rep:
-  assumes "j < 2^m" and "m ≥ 1"
-  shows "(pm [G (nat i) m. i<-[1..m]] m) * |unit_vec (2^m) j⟩  = ψ⇩1 m j" 
+  assumes "j < 2^n" and "n ≥ 1"
+  shows "(pm [G (nat i) n. i<-[1..n]] n) * |unit_vec (2^n) j⟩  = ψ⇩1 n j" 
 proof-
-  have "(pm [G (nat i) m. i<-[1..m]] m) * |unit_vec (2^m) j⟩  = (pm [G (nat i) m. i<-[1..m]] m) * (⨂r 1 m m j)"
+  have "(pm [G (nat i) n. i<-[1..n]] n) * |unit_vec (2^n) j⟩  = (pm [G (nat i) n. i<-[1..n]] n) * (⨂r 1 n n j)"
     using assms(1-2) ket_unit_to_tensor_prod by simp
-  then have "(pm [G (nat i) m. i<-[1..m]] m) * |unit_vec (2^m) j⟩ = ((pr [psq (nat i) m m j. i<-[1..m]] m) ⨂ (⨂r (m+1) (m-m) m j))" 
+  then have "(pm [G (nat i) n. i<-[1..n]] n) * |unit_vec (2^n) j⟩ = ((pr [psq (nat i) n n j. i<-[1..n]] n) ⨂ (⨂r (n+1) (n-n) n j))" 
     using app_all_G assms by simp
-  moreover have "(⨂r (m+1) (m-m) m j) = (Id 0)" by simp
-  ultimately have "(pm [G (nat i) m. i<-[1..m]] m) * |unit_vec (2^m) j⟩ = (pr [psq (nat i) m m j. i<-[1..m]] m)" by simp
+  moreover have "(⨂r (n+1) (n-n) n j) = (Id 0)" by simp
+  ultimately have "(pm [G (nat i) n. i<-[1..n]] n) * |unit_vec (2^n) j⟩ = (pr [psq (nat i) n n j. i<-[1..n]] n)" by simp
   then show ?thesis by simp
 qed
 
 abbreviation ψ⇩2 :: "nat ⇒ nat ⇒ complex Matrix.mat" where 
-  "ψ⇩2 m j ≡ pr [psq (m+1-nat k) m m j. k<-[1..m] ] m"
+  "ψ⇩2 n j ≡ pr [psq (n+1-nat k) n n j. k<-[1..n] ] n"
 
 lemma list_shift_one:
   assumes "n ≥ 1"
@@ -2740,60 +2739,60 @@ next
 qed
  
 lemma rev_of_qr_list:
-  assumes "n ≥ 1"
-  shows "n ≤ m ⟶ (rev [psq (nat k) m m j. k<-[1..n]]) = [psq (n+1-nat k) m m j. k<-[1..n]]"
+  assumes "m ≥ 1"
+  shows "m ≤ n ⟶ (rev [psq (nat k) n n j. k<-[1..m]]) = [psq (m+1-nat k) n n j. k<-[1..m]]"
 proof(rule Nat.nat_induct_at_least)
-  show "n≥1" using assms by simp
+  show "m ≥ 1" using assms by simp
 next
-  show "1 ≤ m ⟶ (rev [psq (nat k) m m j. k<-[1..int 1]]) = [psq (1+1-nat k) m m j. k<-[1..int 1]]" by auto
+  show "1 ≤ n ⟶ (rev [psq (nat k) n n j. k<-[1..int 1]]) = [psq (1+1-nat k) n n j. k<-[1..int 1]]" by auto
 next
-  fix n 
-  assume a0: "n ≥ 1"
-     and IH: "n ≤ m ⟶ (rev [psq (nat k) m m j. k<-[1..n]]) = [psq (n+1-nat k) m m j. k<-[1..n]]"
-  show "(Suc n) ≤ m ⟶ (rev [psq (nat k) m m j. k<-[1..(Suc n)]]) = [psq ((Suc n)+1-nat k) m m j. k<-[1..(Suc n)]]"
+  fix m 
+  assume a0: "m ≥ 1"
+     and IH: "m ≤ n ⟶ (rev [psq (nat k) n n j. k<-[1..m]]) = [psq (m+1-nat k) n n j. k<-[1..m]]"
+  show "(Suc m) ≤ n ⟶ (rev [psq (nat k) n n j. k<-[1..(Suc m)]]) = [psq ((Suc m)+1-nat k) n n j. k<-[1..(Suc m)]]"
   proof
-    assume a1: "(Suc n) ≤ m " 
-    have "[psq (nat (Suc n)) m m j] = [psq (nat k) m m j. k<-[(Suc n)..(Suc n)]]" by simp
-    then have "(rev [psq (nat k) m m j. k<-[1..(Suc n)]]) = psq (nat (Suc n)) m m j # (rev [psq (nat k) m m j. k<-[1..n]])"
+    assume a1: "(Suc m) ≤ n " 
+    have "[psq (nat (Suc m)) n n j] = [psq (nat k) n n j. k<-[(Suc m)..(Suc m)]]" by simp
+    then have "(rev [psq (nat k) n n j. k<-[1..(Suc m)]]) = psq (nat (Suc m)) n n j # (rev [psq (nat k) n n j. k<-[1..m]])"
       by (simp add: upto_rec2)
-    then have "(rev [psq (nat k) m m j. k<-[1..(Suc n)]]) = psq (nat (Suc n)) m m j # [psq (n+1-nat k) m m j. k<-[1..n]]"
+    then have "(rev [psq (nat k) n n j. k<-[1..(Suc m)]]) = psq (nat (Suc m)) n n j # [psq (m+1-nat k) n n j. k<-[1..m]]"
       using IH a1 by simp
-    moreover have "[psq (n+1-nat k) m m j. k<-[1..n]] = [psq (Suc n+1-nat k) m m j. k<-[2..Suc n]]" 
+    moreover have "[psq (m+1-nat k) n n j. k<-[1..m]] = [psq (Suc m+1-nat k) n n j. k<-[2..Suc m]]" 
     proof-
-      have "[psq (n+1-nat k) m m j. k<-[1..int n]] = [psq (n+1-nat (k-1)) m m j. k<-[2..int (Suc n)]]"
-        using list_shift_one[of n "λk. psq (n+1-nat k) m m j" ] a0 by simp
-      moreover have "k ≥ 1 ⟶ n+1-nat (k-1) = Suc n+1-nat k" for k by auto
+      have "[psq (m+1-nat k) n n j. k<-[1..int m]] = [psq (m+1-nat (k-1)) n n j. k<-[2..int (Suc m)]]"
+        using list_shift_one[of m "λk. psq (m+1-nat k) n n j" ] a0 by simp
+      moreover have "k ≥ 1 ⟶ m+1-nat (k-1) = Suc m+1-nat k" for k by auto
       ultimately show ?thesis by simp
     qed
-    ultimately have "(rev [psq (nat k) m m j. k<-[1..(Suc n)]]) =  psq (nat (Suc n)+1-1) m m j # [psq (Suc n+1-nat k) m m j. k<-[2..Suc n]]"
+    ultimately have "(rev [psq (nat k) n n j. k<-[1..(Suc m)]]) =  psq (nat (Suc m)+1-1) n n j # [psq (Suc m+1-nat k) n n j. k<-[2..Suc m]]"
       by simp
-    then show "(rev [psq (nat k) m m j. k<-[1..(Suc n)]]) = [psq ((Suc n)+1-nat k) m m j. k<-[1..(Suc n)]]" 
+    then show "(rev [psq (nat k) n n j. k<-[1..(Suc m)]]) = [psq ((Suc m)+1-nat k) n n j. k<-[1..(Suc m)]]" 
       by (smt Cons_eq_map_conv One_nat_def nat.simps(3) nat_1 nat_int of_nat_le_0_iff upto_rec1)
   qed
 qed
 
 theorem quantum_fourier_transform_prod_rep:
-  assumes "j < 2^m" and "m ≥ 1"
-  shows "(QFT m) * |unit_vec (2^m) j⟩ = ψ⇩2 m j" 
+  assumes "j < 2^n" and "n ≥ 1"
+  shows "(QFT n) * |unit_vec (2^n) j⟩ = ψ⇩2 n j" 
 proof-
-  have "length [G (nat i) m. i<-[1..m]] = m" by simp
-  moreover have "∀x∈set (map (λi. G nat i m) [1..int m]). dim_row x = 2 ^ m ∧ dim_col x = 2 ^ m" using G_dim by auto
-  ultimately have "(pm [G (nat i) m. i<-[1..m]] m) ∈ carrier_mat (2^m) (2^m)" 
-    using assms pow_mult_dim[of m "[G (nat i) m. i<-[1..m]]" "2^m"] by auto
-  moreover have "(rQB m m) ∈ carrier_mat (2^m) (2^m)" using reverse_qubits_dim by auto
-  moreover have "|unit_vec (2^m) j⟩ ∈ carrier_mat (2^m) 1" by (simp add: ket_vec_def)
-  ultimately have "(QFT m) * |unit_vec (2^m) j⟩  = (rQB m m) * ((pm [G (nat i) m. i<-[1..m]] m) * |unit_vec (2^m) j⟩)"
+  have "length [G (nat i) n. i<-[1..n]] = n" by simp
+  moreover have "∀x∈set (map (λi. G nat i n) [1..int n]). dim_row x = 2 ^ n ∧ dim_col x = 2 ^ n" using G_dim by auto
+  ultimately have "(pm [G (nat i) n. i<-[1..n]] n) ∈ carrier_mat (2^n) (2^n)" 
+    using assms pow_mult_dim[of n "[G (nat i) n. i<-[1..n]]" "2^n"] by auto
+  moreover have "(rQB n n) ∈ carrier_mat (2^n) (2^n)" using reverse_qubits_dim by auto
+  moreover have "|unit_vec (2^n) j⟩ ∈ carrier_mat (2^n) 1" by (simp add: ket_vec_def)
+  ultimately have "(QFT n) * |unit_vec (2^n) j⟩  = (rQB n n) * ((pm [G (nat i) n. i<-[1..n]] n) * |unit_vec (2^n) j⟩)"
     using quantum_fourier_transform_def by simp
-  then have "(QFT m) * |unit_vec (2^m) j⟩  = (rQB m m) * (ψ⇩1 m j)" 
+  then have "(QFT n) * |unit_vec (2^n) j⟩  = (rQB n n) * (ψ⇩1 n j)" 
     using assms aux_quantum_fourier_transform_prod_rep by simp
-  moreover have "(rQB m m) * (ψ⇩1 m j) = (ψ⇩2 m j)" 
+  moreover have "(rQB n n) * (ψ⇩1 n j) = (ψ⇩2 n j)" 
   proof-
-    have "m ≤ m ⟶ (rQB m m) * (pr [psq (nat k) m m j. k<-[1..m]] m) 
-       = (pr (rev [psq (nat k) m m j. k<-[1..m]]) m) ⨂ (pr [psq (nat k) m m j. k<-[m+1..m]] (m-m))" 
+    have "n ≤ n ⟶ (rQB n n) * (pr [psq (nat k) n n j. k<-[1..n]] n) 
+       = (pr (rev [psq (nat k) n n j. k<-[1..n]]) n) ⨂ (pr [psq (nat k) n n j. k<-[n+1..n]] (n-n))" 
       using app_reverse_qubits by simp 
-    then have "(rQB m m) * (ψ⇩1 m j) = (pr (rev [psq (nat k) m m j. k<-[1..m]]) m)" by auto 
-    moreover have "(rev [psq (nat k) m m j. k<-[1..m]]) = [psq (m+1-nat k) m m j. k<-[1..m]]" 
-      using rev_of_qr_list[of m m j] assms by simp
+    then have "(rQB n n) * (ψ⇩1 n j) = (pr (rev [psq (nat k) n n j. k<-[1..n]]) n)" by auto 
+    moreover have "(rev [psq (nat k) n n j. k<-[1..n]]) = [psq (n+1-nat k) n n j. k<-[1..n]]" 
+      using rev_of_qr_list[of n n j] assms by simp
     ultimately show ?thesis by simp
   qed
   ultimately show ?thesis by simp
@@ -2814,15 +2813,15 @@ proof-
 qed 
 
 lemma aux_exp_term_one_2: 
-  assumes "i ∈ {k-1..m-1}" and "m ≥ 1" and "m ≥ k" and "k ≥ 1" and "jd < 2^m"
-  shows "1/2^(m-k+1)*real 2^(m-(i+1)) = 1/2^(i-(k-1)+1)" 
+  assumes "i ∈ {k-1..n-1}" and "n ≥ 1" and "n ≥ k" and "k ≥ 1" 
+  shows "1/2^(n-k+1)*real 2^(n-(i+1)) = 1/2^(i-(k-1)+1)" 
 proof-
-  have "(m::nat) - ((i::nat) + (1::nat)) ≤ m - (k::nat) + (1::nat)"
+  have "(n::nat) - ((i::nat) + (1::nat)) ≤ n - (k::nat) + (1::nat)"
     using assms diff_le_mono2 by auto
-  then have "(2::nat)^(m-k+1) * 1/2^(m-(i+1)) = 2^(m-k+1-(m-(i+1)))"
-    using power_diff[of "2::nat" "m-(i+1)" "m-k+1"] 
+  then have "(2::nat)^(n-k+1) * 1/2^(n-(i+1)) = 2^(n-k+1-(n-(i+1)))"
+    using power_diff[of "2::nat" "n-(i+1)" "n-k+1"] 
     by (smt mult.right_neutral of_nat_1 of_nat_add of_nat_power one_add_one power_diff)
-  then have "(2::nat)^(m-k+1) * 1/2^(m-(i+1)) = 2^(i-(k-1)+1)" 
+  then have "(2::nat)^(n-k+1) * 1/2^(n-(i+1)) = 2^(i-(k-1)+1)" 
     using assms
     by (smt Nat.add_diff_assoc2 add_diff_cancel_right atLeastAtMost_iff le_add_diff_inverse2
         cancel_ab_semigroup_add_class.diff_right_commute diff_diff_cancel diff_le_mono2) 
@@ -2832,129 +2831,129 @@ proof-
 qed
 
 lemma bit_representation:
-  assumes "j < 2^m" and "m ≥ 1"
-  shows "j = (∑i∈{1..m}. (bin_rep m j)!(i-1) * 2^(m-i))" 
+  assumes "j < 2^n" and "n ≥ 1"
+  shows "j = (∑i∈{1..n}. (bin_rep n j)!(i-1) * 2^(n-i))" 
 proof-
-  have "j = (∑i<m. bin_rep m j ! i * 2^(m-1-i))" 
-    using bin_rep_eq[of m j] assms by simp
-  also have "... = (∑i∈{0..m-1}. bin_rep m j ! i * 2^(m-1-i))" 
+  have "j = (∑i<n. bin_rep n j ! i * 2^(n-1-i))" 
+    using bin_rep_eq[of n j] assms by simp
+  also have "... = (∑i∈{0..n-1}. bin_rep n j ! i * 2^(n-1-i))" 
     using assms(2)
     by (metis atLeast0AtMost lessThan_Suc_atMost ordered_cancel_comm_monoid_diff_class.add_diff_inverse plus_1_eq_Suc)
-  also have "... = (∑i∈{1..m-1+1}. bin_rep m j ! (i-1) * 2^(m-1-(i-1)))"
-    using sum.shift_bounds_cl_nat_ivl[of "λi. bin_rep m j ! (i-1) * 2^(m-1-(i-1))" 0 1 "m-1"] by simp 
-  also have "... = (∑i∈{1..m}. bin_rep m j ! (i-1) * 2^(m-1-(i-1)))"
+  also have "... = (∑i∈{1..n-1+1}. bin_rep n j ! (i-1) * 2^(n-1-(i-1)))"
+    using sum.shift_bounds_cl_nat_ivl[of "λi. bin_rep n j ! (i-1) * 2^(n-1-(i-1))" 0 1 "n-1"] by simp 
+  also have "... = (∑i∈{1..n}. bin_rep n j ! (i-1) * 2^(n-1-(i-1)))"
     using add_Suc_right assms(2) ordered_cancel_comm_monoid_diff_class.add_diff_inverse plus_1_eq_Suc by simp
   finally show ?thesis by simp
 qed
 
 lemma exp_term_one:
-  assumes "m ≥ 1" and "k ≥ 1" and "jd < 2^m"
-  shows "k ≤ m ⟶ exp(2*pi*𝗂*(∑i∈{1..<k}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i))) = 1"
+  assumes "n ≥ 1" and "k ≥ 1" and "jd < 2^n"
+  shows "k ≤ n ⟶ exp(2*pi*𝗂*(∑i∈{1..<k}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i))) = 1"
 proof(rule Nat.nat_induct_at_least[of 1 k])
   show "k≥1" using assms by simp
 next
-  have "(∑i∈{(1::nat)..<1}. (bin_rep m jd)!(i-1) * 1/2^(m-1+1)*real 2^(m-i)) = 0" 
+  have "(∑i∈{(1::nat)..<1}. (bin_rep n jd)!(i-1) * 1/2^(n-1+1)*real 2^(n-i)) = 0" 
     by simp 
-  then show "1≤m ⟶exp(2*pi*𝗂*(∑i∈{1..<1}. (bin_rep m jd)!(i-1) * 1/2^(m-1+1)*real 2^(m-i))) = 1"
+  then show "1≤n ⟶exp(2*pi*𝗂*(∑i∈{1..<1}. (bin_rep n jd)!(i-1) * 1/2^(n-1+1)*real 2^(n-i))) = 1"
     by simp
 next
   fix k::nat
   assume a0: "k ≥ 1"
-  assume IH: "k ≤ m ⟶ exp(2*pi*𝗂*(∑i∈{1..<k}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i))) = 1"
-  show "(Suc k) ≤ m ⟶ exp(2*pi*𝗂*(∑i∈{1..<(Suc k)}. (bin_rep m jd)!(i-1) * 1/2^(m-(Suc k)+1)*real 2^(m-i))) = 1"
+  assume IH: "k ≤ n ⟶ exp(2*pi*𝗂*(∑i∈{1..<k}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i))) = 1"
+  show "(Suc k) ≤ n ⟶ exp(2*pi*𝗂*(∑i∈{1..<(Suc k)}. (bin_rep n jd)!(i-1) * 1/2^(n-(Suc k)+1)*real 2^(n-i))) = 1"
   proof
-    assume a1: "(Suc k) ≤ m"
-    have "(∑i∈{1..<(Suc k)}. (bin_rep m jd)!(i-1) * 1/2^(m-(Suc k)+1)*real 2^(m-i)) =
-          (∑i∈{1..<k}. (bin_rep m jd)!(i-1) * 1/2^(m-(Suc k)+1)*real 2^(m-i))
-        + (bin_rep m jd)!(k-1) * 1/2^(m-(Suc k)+1)*real 2^(m-k)" using sum_Un a0 by simp 
-    then have "(∑i∈{1..<(Suc k)}. (bin_rep m jd)!(i-1) * 1/2^(m-(Suc k)+1)*real 2^(m-i)) =
-               (2::nat) * (∑i∈{1..<k}.  ((bin_rep m jd)!(i-1) * 1/2^(m-k+1) * real 2^(m-i))) 
-             + (bin_rep m jd)!(k-1) * 1/2^(m-(Suc k)+1)*real 2^(m-k)"
-      using sum_distrib_left[of 2 "λi.((bin_rep m jd)!(i-1) * 1/2^(m-k+1) * real 2^(m-i))" "{1..<k}" ] a1 by simp
-    then have "exp(2*pi*𝗂*(∑i∈{1..<(Suc k)}. (bin_rep m jd)!(i-1) * 1/2^(m-(Suc k)+1)*real 2^(m-i))) =
-               exp((2::nat)*(2*pi*𝗂*(∑i∈{1..<k}. ((bin_rep m jd)!(i-1) * 1/2^(m-k+1) * real 2^(m-i))))) 
-             * exp(2*pi*𝗂*((bin_rep m jd)!(k-1) * 1/2^(m-(Suc k)+1)*real 2^(m-k)))" 
-      using exp_add distrib_left[of "(2*pi*𝗂)" "((2::nat)*(∑i∈{1..<k}. ((bin_rep m jd)!(i-1) * 1/2^(m-k+1) * real 2^(m-i))))"] 
+    assume a1: "(Suc k) ≤ n"
+    have "(∑i∈{1..<(Suc k)}. (bin_rep n jd)!(i-1) * 1/2^(n-(Suc k)+1)*real 2^(n-i)) =
+          (∑i∈{1..<k}. (bin_rep n jd)!(i-1) * 1/2^(n-(Suc k)+1)*real 2^(n-i))
+        + (bin_rep n jd)!(k-1) * 1/2^(n-(Suc k)+1)*real 2^(n-k)" using sum_Un a0 by simp 
+    then have "(∑i∈{1..<(Suc k)}. (bin_rep n jd)!(i-1) * 1/2^(n-(Suc k)+1)*real 2^(n-i)) =
+               (2::nat) * (∑i∈{1..<k}.  ((bin_rep n jd)!(i-1) * 1/2^(n-k+1) * real 2^(n-i))) 
+             + (bin_rep n jd)!(k-1) * 1/2^(n-(Suc k)+1)*real 2^(n-k)"
+      using sum_distrib_left[of 2 "λi.((bin_rep n jd)!(i-1) * 1/2^(n-k+1) * real 2^(n-i))" "{1..<k}" ] a1 by simp
+    then have "exp(2*pi*𝗂*(∑i∈{1..<(Suc k)}. (bin_rep n jd)!(i-1) * 1/2^(n-(Suc k)+1)*real 2^(n-i))) =
+               exp((2::nat)*(2*pi*𝗂*(∑i∈{1..<k}. ((bin_rep n jd)!(i-1) * 1/2^(n-k+1) * real 2^(n-i))))) 
+             * exp(2*pi*𝗂*((bin_rep n jd)!(k-1) * 1/2^(n-(Suc k)+1)*real 2^(n-k)))" 
+      using exp_add distrib_left[of "(2*pi*𝗂)" "((2::nat)*(∑i∈{1..<k}. ((bin_rep n jd)!(i-1) * 1/2^(n-k+1) * real 2^(n-i))))"] 
       by simp
-    then have "exp(2*pi*𝗂*(∑i∈{1..<(Suc k)}. (bin_rep m jd)!(i-1) * 1/2^(m-(Suc k)+1)*real 2^(m-i))) =
-               exp((2*pi*𝗂*(∑i∈{1..<k}. ((bin_rep m jd)!(i-1) * 1/2^(m-k+1) * real 2^(m-i)))))^2
-             * exp(2*pi*𝗂*((bin_rep m jd)!(k-1) * 1/2^(m-(Suc k)+1)*real 2^(m-k)))" 
+    then have "exp(2*pi*𝗂*(∑i∈{1..<(Suc k)}. (bin_rep n jd)!(i-1) * 1/2^(n-(Suc k)+1)*real 2^(n-i))) =
+               exp((2*pi*𝗂*(∑i∈{1..<k}. ((bin_rep n jd)!(i-1) * 1/2^(n-k+1) * real 2^(n-i)))))^2
+             * exp(2*pi*𝗂*((bin_rep n jd)!(k-1) * 1/2^(n-(Suc k)+1)*real 2^(n-k)))" 
       by (metis (mono_tags, lifting) exp_double of_nat_numeral)
-    then have "exp(2*pi*𝗂*(∑i∈{1..<(Suc k)}. (bin_rep m jd)!(i-1) * 1/2^(m-(Suc k)+1)*real 2^(m-i))) =
-               exp(2*pi*𝗂*((bin_rep m jd)!(k-1) * 1/2^(m-(Suc k)+1)*real 2^(m-k)))" 
+    then have "exp(2*pi*𝗂*(∑i∈{1..<(Suc k)}. (bin_rep n jd)!(i-1) * 1/2^(n-(Suc k)+1)*real 2^(n-i))) =
+               exp(2*pi*𝗂*((bin_rep n jd)!(k-1) * 1/2^(n-(Suc k)+1)*real 2^(n-k)))" 
       using IH a1 by simp
-    moreover have "exp(2*pi*𝗂*((bin_rep m jd)!(k-1) * 1/2^(m-(Suc k)+1)*real 2^(m-k))) = 1"
+    moreover have "exp(2*pi*𝗂*((bin_rep n jd)!(k-1) * 1/2^(n-(Suc k)+1)*real 2^(n-k))) = 1"
     proof(rule disjE)
-      show "(bin_rep m jd)!(k-1) = 0 ∨ (bin_rep m jd)!(k-1) = 1" 
+      show "(bin_rep n jd)!(k-1) = 0 ∨ (bin_rep n jd)!(k-1) = 1" 
         using bin_rep_coeff a0 a1 assms diff_less_Suc less_le_trans by blast
     next
-      assume "(bin_rep m jd)!(k-1) = 0"
+      assume "(bin_rep n jd)!(k-1) = 0"
       then show ?thesis by simp
     next
-      assume "(bin_rep m jd)!(k-1) = 1"
-      then have "exp(2*pi*𝗂*((bin_rep m jd)!(k-1) * 1/2^(m-(Suc k)+1)*real 2^(m-k)))
-               = exp(2*pi*𝗂*( 1/2^(m-(Suc k)+1)*real 2^(m-k)))" by auto
-      then have "exp(2*pi*𝗂*((bin_rep m jd)!(k-1) * 1/2^(m-(Suc k)+1)*real 2^(m-k)))
-               = exp(2*pi*𝗂*( 1/2^(m-k)*real 2^(m-k)))" 
+      assume "(bin_rep n jd)!(k-1) = 1"
+      then have "exp(2*pi*𝗂*((bin_rep n jd)!(k-1) * 1/2^(n-(Suc k)+1)*real 2^(n-k)))
+               = exp(2*pi*𝗂*( 1/2^(n-(Suc k)+1)*real 2^(n-k)))" by auto
+      then have "exp(2*pi*𝗂*((bin_rep n jd)!(k-1) * 1/2^(n-(Suc k)+1)*real 2^(n-k)))
+               = exp(2*pi*𝗂*( 1/2^(n-k)*real 2^(n-k)))" 
         using a1
         by (metis (no_types, lifting) One_nat_def Suc_diff_le add.right_neutral add_Suc_right diff_Suc_Suc)
-      then have "exp(2*pi*𝗂*((bin_rep m jd)!(k-1) * 1/2^(m-(Suc k)+1)*real 2^(m-k))) = exp(2*pi*𝗂)"  
+      then have "exp(2*pi*𝗂*((bin_rep n jd)!(k-1) * 1/2^(n-(Suc k)+1)*real 2^(n-k))) = exp(2*pi*𝗂)"  
         using  a0 a1 aux_exp_term_one_1
         by (smt Suc_diff_le Suc_eq_plus1 Suc_leD add.right_neutral add_diff_cancel_right' diff_Suc_Suc le_SucI mult.right_neutral 
             of_nat_power of_real_hom.hom_one order_refl plus_1_eq_Suc power.simps(1))
-      then show "exp(2*pi*𝗂*((bin_rep m jd)!(k-1) * 1/2^(m-(Suc k)+1)*real 2^(m-k))) = 1" by simp
+      then show "exp(2*pi*𝗂*((bin_rep n jd)!(k-1) * 1/2^(n-(Suc k)+1)*real 2^(n-k))) = 1" by simp
     qed
-    ultimately show "exp(2*pi*𝗂*(∑i∈{1..<(Suc k)}. (bin_rep m jd)!(i-1) * 1/2^(m-(Suc k)+1)*real 2^(m-i))) = 1" 
+    ultimately show "exp(2*pi*𝗂*(∑i∈{1..<(Suc k)}. (bin_rep n jd)!(i-1) * 1/2^(n-(Suc k)+1)*real 2^(n-i))) = 1" 
       by simp
   qed
 qed
 
 lemma aux_qr_different_rep:
-  assumes "m ≥ 1" and "m ≥ k" and "k ≥ 1" and "jd < 2^m"
-  shows "psq k m m jd = Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(m-k+1))*1/sqrt(2))" 
+  assumes "n ≥ 1" and "n ≥ k" and "k ≥ 1" and "jd < 2^n"
+  shows "psq k n n jd = Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(n-k+1))*1/sqrt(2))" 
 proof- 
-  have "psq k m m jd = (Matrix.mat 2 1 (λ(i,j). if i=0 then (1::complex)/sqrt(2) 
-              else (exp (complex_of_real (2*pi)*𝗂*(bin_frac (k-1) (m-1) m jd)))*1/sqrt(2)))"
+  have "psq k n n jd = (Matrix.mat 2 1 (λ(i,j). if i=0 then (1::complex)/sqrt(2) 
+              else (exp (complex_of_real (2*pi)*𝗂*(bin_frac (k-1) (n-1) n jd)))*1/sqrt(2)))"
         using phase_shifted_qubit_def by auto
-  moreover have "exp(2*pi*𝗂*jd/2^(m-k+1)) = exp (complex_of_real (2*pi)*𝗂*(bin_frac (k-1) (m-1) m jd))" 
+  moreover have "exp(2*pi*𝗂*jd/2^(n-k+1)) = exp (complex_of_real (2*pi)*𝗂*(bin_frac (k-1) (n-1) n jd))" 
   proof-
-    have "exp(2*pi*𝗂*jd/2^(m-k+1)) = exp(2*pi*𝗂*(∑i∈{1..m}. (bin_rep m jd)!(i-1) * 2^(m-i))*1/2^(m-k+1))" 
+    have "exp(2*pi*𝗂*jd/2^(n-k+1)) = exp(2*pi*𝗂*(∑i∈{1..n}. (bin_rep n jd)!(i-1) * 2^(n-i))*1/2^(n-k+1))" 
       using bit_representation assms by simp
-    then have "exp(2*pi*𝗂*jd/2^(m-k+1)) = exp(2*pi*𝗂*(1/2^(m-k+1)*real(∑i∈{1..m}. (bin_rep m jd)!(i-1) * 2^(m-i))))" 
+    then have "exp(2*pi*𝗂*jd/2^(n-k+1)) = exp(2*pi*𝗂*(1/2^(n-k+1)*real(∑i∈{1..n}. (bin_rep n jd)!(i-1) * 2^(n-i))))" 
       using Groups.mult_ac(1) mult.right_neutral times_divide_eq_left by simp
-    moreover have "(1/2^(m-k+1)*real(∑i∈{1..m}. (bin_rep m jd)!(i-1) * 2^(m-i)))
-                 = (∑i∈{1..m}. 1/2^(m-k+1)*((bin_rep m jd)!(i-1) * 2^(m-i)))"
-      using sum_distrib_left[of "1/2^(m-k+1)" "λi.(bin_rep m jd)!(i-1) * 2^(m-i)" "{1..m}"] by auto 
-    ultimately have "exp(2*pi*𝗂*jd/2^(m-k+1)) = exp(2*pi*𝗂*(∑i∈{1..m}. 1/2^(m-k+1)*((bin_rep m jd)!(i-1) * 2^(m-i))))"
+    moreover have "(1/2^(n-k+1)*real(∑i∈{1..n}. (bin_rep n jd)!(i-1) * 2^(n-i)))
+                 = (∑i∈{1..n}. 1/2^(n-k+1)*((bin_rep n jd)!(i-1) * 2^(n-i)))"
+      using sum_distrib_left[of "1/2^(n-k+1)" "λi.(bin_rep n jd)!(i-1) * 2^(n-i)" "{1..n}"] by auto 
+    ultimately have "exp(2*pi*𝗂*jd/2^(n-k+1)) = exp(2*pi*𝗂*(∑i∈{1..n}. 1/2^(n-k+1)*((bin_rep n jd)!(i-1) * 2^(n-i))))"
       by presburger
-    then have "exp(2*pi*𝗂*jd/2^(m-k+1)) = exp(2*pi*𝗂*(∑i∈{1..m}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i)))"
+    then have "exp(2*pi*𝗂*jd/2^(n-k+1)) = exp(2*pi*𝗂*(∑i∈{1..n}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i)))"
       by simp
-    moreover have "(∑i∈{1..m}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i)) = 
-          (∑i∈{1..<k}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i)) +
-          (∑i∈{k..m}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i))" 
+    moreover have "(∑i∈{1..n}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i)) = 
+          (∑i∈{1..<k}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i)) +
+          (∑i∈{k..n}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i))" 
       using assms(2-3) 
       by (smt atLeastLessThanSuc_atLeastAtMost le_eq_less_or_eq le_less_trans lessI sum.atLeastLessThan_concat)
-    ultimately have "exp(2*pi*𝗂*jd/2^(m-k+1)) 
-= exp(2*pi*𝗂*((∑i∈{1..<k}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i))+(∑i∈{k..m}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i))))"
+    ultimately have "exp(2*pi*𝗂*jd/2^(n-k+1)) 
+= exp(2*pi*𝗂*((∑i∈{1..<k}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i))+(∑i∈{k..n}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i))))"
       by metis
-    then have "exp(2*pi*𝗂*jd/2^(m-k+1)) 
-             = exp(2*pi*𝗂*(∑i∈{1..<k}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i))) *
-               exp(2*pi*𝗂*(∑i∈{k..m}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i)))"
+    then have "exp(2*pi*𝗂*jd/2^(n-k+1)) 
+             = exp(2*pi*𝗂*(∑i∈{1..<k}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i))) *
+               exp(2*pi*𝗂*(∑i∈{k..n}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i)))"
       using exp_add by (simp add: distrib_left)
-    then have "exp(2*pi*𝗂*jd/2^(m-k+1)) = exp(2*pi*𝗂*(∑i∈{k..m}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i)))"
+    then have "exp(2*pi*𝗂*jd/2^(n-k+1)) = exp(2*pi*𝗂*(∑i∈{k..n}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i)))"
       using assms exp_term_one by auto
-    moreover have "exp(2*pi*𝗂*(∑i∈{k..m}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i)))
-                 = exp(2*pi*𝗂*(bin_frac (k-1) (m-1) m jd))" 
+    moreover have "exp(2*pi*𝗂*(∑i∈{k..n}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i)))
+                 = exp(2*pi*𝗂*(bin_frac (k-1) (n-1) n jd))" 
     proof-
-      have "(∑i∈{k..m}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i))
-          = (∑i∈{k-1..m-1}. (bin_rep m jd)!i* 1/2^(m-k+1)*real 2^(m-(i+1)))"
-        using sum.shift_bounds_cl_nat_ivl[of "λi.(bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i)" "k-1" 1 "m-1"] assms(1,3)
+      have "(∑i∈{k..n}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i))
+          = (∑i∈{k-1..n-1}. (bin_rep n jd)!i* 1/2^(n-k+1)*real 2^(n-(i+1)))"
+        using sum.shift_bounds_cl_nat_ivl[of "λi.(bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i)" "k-1" 1 "n-1"] assms(1,3)
         by simp
-      moreover have "(∑i∈{k-1..m-1}. (bin_rep m jd)!i * (1/2^(m-k+1)*real 2^(m-(i+1))))
-                   = (∑i∈{k-1..m-1}. (bin_rep m jd)!i * (1/2^(i-(k-1)+1)))" 
+      moreover have "(∑i∈{k-1..n-1}. (bin_rep n jd)!i * (1/2^(n-k+1)*real 2^(n-(i+1))))
+                   = (∑i∈{k-1..n-1}. (bin_rep n jd)!i * (1/2^(i-(k-1)+1)))" 
         using aux_exp_term_one_2 assms by (metis (no_types, lifting) sum.cong) 
-      ultimately have "(∑i∈{k..m}. (bin_rep m jd)!(i-1) * 1/2^(m-k+1)*real 2^(m-i))
-           =(∑i∈{k-1..m-1}. (bin_rep m jd)!i* 1/2^(i-(k-1)+1))"
+      ultimately have "(∑i∈{k..n}. (bin_rep n jd)!(i-1) * 1/2^(n-k+1)*real 2^(n-i))
+           =(∑i∈{k-1..n-1}. (bin_rep n jd)!i* 1/2^(i-(k-1)+1))"
         by simp
       then show ?thesis using bin_frac_def by simp
     qed
@@ -2964,32 +2963,32 @@ proof-
 qed
 
 lemma qr_different_rep:
-  assumes "m ≥ 1" and "m ≥ k" and "k ≥ 1" and "jd < 2^m"
-  shows "psq k m m jd = Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(m-k+1))*1/sqrt(2))" 
+  assumes "n ≥ 1" and "n ≥ k" and "k ≥ 1" and "jd < 2^n"
+  shows "psq k n n jd = Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(n-k+1))*1/sqrt(2))" 
 proof-
-  have "psq k m m jd = Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(m-k+1))*1/sqrt(2))" 
+  have "psq k n n jd = Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(n-k+1))*1/sqrt(2))" 
     using aux_qr_different_rep assms by simp
-  moreover have "Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(m-k+1))*1/sqrt(2))
-               = Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(m-k+1))*1/sqrt(2))"
+  moreover have "Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(n-k+1))*1/sqrt(2))
+               = Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(n-k+1))*1/sqrt(2))"
   proof
     fix i j
-    assume "i < dim_row (Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(m-k+1))*1/sqrt(2)))"
-       and "j < dim_col (Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(m-k+1))*1/sqrt(2)))"
+    assume "i < dim_row (Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(n-k+1))*1/sqrt(2)))"
+       and "j < dim_col (Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(n-k+1))*1/sqrt(2)))"
     then have "i ∈ {0,1} ∧ j = 0" by auto
-    moreover have "Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(m-k+1))*1/sqrt(2)) $$ (0,0)
-              = Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(m-k+1))*1/sqrt(2)) $$ (0,0)"
+    moreover have "Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(n-k+1))*1/sqrt(2)) $$ (0,0)
+              = Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(n-k+1))*1/sqrt(2)) $$ (0,0)"
       by simp
-    moreover have "Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(m-k+1))*1/sqrt(2)) $$ (1,0)
-              = Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(m-k+1))*1/sqrt(2)) $$ (1,0)" by simp  
-    ultimately show "Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(m-k+1))*1/sqrt(2)) $$ (i,j)
-              = Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(m-k+1))*1/sqrt(2)) $$ (i,j)" by auto
+    moreover have "Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(n-k+1))*1/sqrt(2)) $$ (1,0)
+              = Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(n-k+1))*1/sqrt(2)) $$ (1,0)" by simp  
+    ultimately show "Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(n-k+1))*1/sqrt(2)) $$ (i,j)
+              = Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(n-k+1))*1/sqrt(2)) $$ (i,j)" by auto
   next
-    show "dim_row (Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(m-k+1))*1/sqrt(2)))
-              = dim_row (Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(m-k+1))*1/sqrt(2)))" 
+    show "dim_row (Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(n-k+1))*1/sqrt(2)))
+              = dim_row (Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(n-k+1))*1/sqrt(2)))" 
       by simp
   next
-    show "dim_col (Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(m-k+1))*1/sqrt(2)))
-              = dim_col (Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(m-k+1))*1/sqrt(2)))" by simp
+    show "dim_col (Matrix.mat 2 1 (λ(i,j). if i=0 then 1/sqrt(2) else exp(2*pi*𝗂*jd/2^(n-k+1))*1/sqrt(2)))
+              = dim_col (Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(n-k+1))*1/sqrt(2)))" by simp
   qed
   ultimately show ?thesis by simp
 qed
@@ -3020,16 +3019,16 @@ proof-
 qed
 
 lemma product_rep_to_matrix_rep: 
-  assumes "n ≥ 1" and "m ≥ 1" and "jd < 2^m"
-  shows "n ≤ m ⟶ (pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..n] ] n)
-       = Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)"
-proof(rule Nat.nat_induct_at_least[of 1 n])
-  show "n ≥ 1" using assms by simp
+  assumes "m ≥ 1" and "n ≥ 1" and "jd < 2^n"
+  shows "m ≤ n ⟶ (pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..m] ] m)
+       = Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)"
+proof(rule Nat.nat_induct_at_least[of 1 m])
+  show "m ≥ 1" using assms by simp
 next
-  show "1 ≤ m ⟶ (pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..int 1] ] 1)
+  show "1 ≤ n ⟶ (pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..int 1] ] 1)
        = Matrix.mat (2^1) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..1}. (bin_rep 1 (of_nat i))!(l-1)/2^l))*1/sqrt(2)^1)"
   proof
-    assume a0: "1 ≤ m"
+    assume a0: "1 ≤ n"
     have "(pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..int 1] ] 1)
        = Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^1)*1/sqrt(2))" by simp
     moreover have "Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^1)*1/sqrt(2))
@@ -3072,175 +3071,175 @@ next
       using a0 by simp
   qed
 next
-  fix n::nat
-  assume a0: "n ≥ 1"
-  assume IH: "n ≤ m ⟶ (pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..n] ] n)
-=  Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)"
-  show "(Suc n) ≤ m ⟶ (pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..(Suc n)] ] (Suc n))
-=  Matrix.mat (2^(Suc n)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc n)}. (bin_rep (Suc n) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc n))"
+  fix m::nat
+  assume a0: "m ≥ 1"
+  assume IH: "m ≤ n ⟶ (pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..m] ] m)
+=  Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)"
+  show "(Suc m) ≤ n ⟶ (pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..(Suc m)] ] (Suc m))
+=  Matrix.mat (2^(Suc m)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc m)}. (bin_rep (Suc m) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc m))"
   proof
-    assume a1: "(Suc n) ≤ m"
-    have "length [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..n]] = n" by simp
-    moreover have "[Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..n]]
-              @ [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k <-[Suc n..Suc n]]
-            = [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..(Suc n)]]" 
+    assume a1: "(Suc m) ≤ n"
+    have "length [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..m]] = m" by simp
+    moreover have "[Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..m]]
+              @ [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k <-[Suc m..Suc m]]
+            = [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..(Suc m)]]" 
       using a0 by (smt One_nat_def map_append nat_1 nat_le_iff of_nat_Suc upto_split1)
-    moreover have "[Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k <-[Suc n..Suc n]]
-                 = [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2))]" by simp
-    ultimately have "(pr ([Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..(Suc n)]]) (n+1))
-      = (pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..n]] n)
-      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2)))" 
-      using pow_tensor_decomp_left[of "[Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..n]]"
-          "n" "(Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2)))"] by simp
-    then have "(pr ([Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..(Suc n)]]) (n+1))
-      = Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)
-      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2)))"
+    moreover have "[Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k <-[Suc m..Suc m]]
+                 = [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2))]" by simp
+    ultimately have "(pr ([Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..(Suc m)]]) (m+1))
+      = (pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..m]] m)
+      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2)))" 
+      using pow_tensor_decomp_left[of "[Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..m]]"
+          "m" "(Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2)))"] by simp
+    then have "(pr ([Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..(Suc m)]]) (m+1))
+      = Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)
+      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2)))"
     using a1 IH by simp
-    moreover have "Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)
-      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2)))
-=  Matrix.mat (2^(Suc n)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc n)}. (bin_rep (Suc n) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc n))"
+    moreover have "Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)
+      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2)))
+=  Matrix.mat (2^(Suc m)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc m)}. (bin_rep (Suc m) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc m))"
     proof
       fix i j
-      assume "i < dim_row (Matrix.mat (2^(Suc n)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc n)}. (bin_rep (Suc n) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc n)))"
-      and "j < dim_col (Matrix.mat (2^(Suc n)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc n)}. (bin_rep (Suc n) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc n)))"
-      then have f0: "i < 2^(Suc n) ∧ j=0" by auto
-      then have "(Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)
-      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2)))) $$ (i,j)
-        = (Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)) $$ (i div 2, j div 2)
-        * (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2)))$$ (i mod 2, j mod 2)" 
+      assume "i < dim_row (Matrix.mat (2^(Suc m)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc m)}. (bin_rep (Suc m) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc m)))"
+      and "j < dim_col (Matrix.mat (2^(Suc m)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc m)}. (bin_rep (Suc m) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc m)))"
+      then have f0: "i < 2^(Suc m) ∧ j=0" by auto
+      then have "(Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)
+      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2)))) $$ (i,j)
+        = (Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)) $$ (i div 2, j div 2)
+        * (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2)))$$ (i mod 2, j mod 2)" 
         by (smt One_nat_def add_self_mod_2 dim_col_mat(1) dim_row_mat(1) index_tensor_mat less_numeral_extra(1) 
             mod_add_self1 mod_div_trivial mod_if one_add_one one_power2 plus_1_eq_Suc plus_nat.simps(2) power_Suc2 power_one_right)
-      then have "(Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)
-      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2)))) $$ (i,j)
-        = (exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat (i div 2)))!(l-1)/2^l))
-        * exp(complex_of_real(2*pi)*𝗂*jd*(of_nat (i mod 2))/2^(nat (Suc n))))*1/sqrt(2)^(Suc n)" using f0 by auto
-      then have "(Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)
-      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2)))) $$ (i,j)
-        = (exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat (i div 2)))!(l-1)/2^l) 
-        + complex_of_real(2*pi)*𝗂*jd*(of_nat (i mod 2))/2^(nat (Suc n))))*1/sqrt(2)^(Suc n)"
+      then have "(Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)
+      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2)))) $$ (i,j)
+        = (exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat (i div 2)))!(l-1)/2^l))
+        * exp(complex_of_real(2*pi)*𝗂*jd*(of_nat (i mod 2))/2^(nat (Suc m))))*1/sqrt(2)^(Suc m)" using f0 by auto
+      then have "(Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)
+      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2)))) $$ (i,j)
+        = (exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat (i div 2)))!(l-1)/2^l) 
+        + complex_of_real(2*pi)*𝗂*jd*(of_nat (i mod 2))/2^(nat (Suc m))))*1/sqrt(2)^(Suc m)"
         by (simp add: exp_add)
-      moreover have "complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat (i div 2)))!(l-1)/2^l)
-                   + complex_of_real(2*pi)*𝗂*jd*(of_nat (i mod 2))/2^(nat (Suc n))
-        = complex_of_real(2*pi)*𝗂*jd*((∑l∈{1..n}. (bin_rep n (i div 2))!(l-1)/2^l) + (of_nat (i mod 2))/2^(nat (Suc n)))" 
-        using distrib_left[of "(complex_of_real(2*pi)*𝗂*jd)" "(∑l∈{1..n}. (bin_rep n (of_nat (i div 2)))!(l-1)/2^l)" 
-                              "(of_nat (i mod 2))/2^(nat (Suc n))"] by auto
-      ultimately have "(Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)
-      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2)))) $$ (i,j)
-    = (exp(complex_of_real(2*pi)*𝗂*jd*((∑l∈{1..n}. (bin_rep n (i div 2))!(l-1)/2^l) + (of_nat (i mod 2))/2^(nat (Suc n)))))*1/sqrt(2)^(Suc n)"
+      moreover have "complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat (i div 2)))!(l-1)/2^l)
+                   + complex_of_real(2*pi)*𝗂*jd*(of_nat (i mod 2))/2^(nat (Suc m))
+        = complex_of_real(2*pi)*𝗂*jd*((∑l∈{1..m}. (bin_rep m (i div 2))!(l-1)/2^l) + (of_nat (i mod 2))/2^(nat (Suc m)))" 
+        using distrib_left[of "(complex_of_real(2*pi)*𝗂*jd)" "(∑l∈{1..m}. (bin_rep m (of_nat (i div 2)))!(l-1)/2^l)" 
+                              "(of_nat (i mod 2))/2^(nat (Suc m))"] by auto
+      ultimately have "(Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)
+      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2)))) $$ (i,j)
+    = (exp(complex_of_real(2*pi)*𝗂*jd*((∑l∈{1..m}. (bin_rep m (i div 2))!(l-1)/2^l) + (of_nat (i mod 2))/2^(nat (Suc m)))))*1/sqrt(2)^(Suc m)"
         by simp
-      moreover have "(∑l∈{1..n}. (bin_rep n (i div 2))!(l-1)/2^l) + (of_nat (i mod 2))/2^(nat (Suc n))
-                    = (∑l∈{1..(Suc n)}. (bin_rep (Suc n) (of_nat i))!(l-1)/2^l)"
+      moreover have "(∑l∈{1..m}. (bin_rep m (i div 2))!(l-1)/2^l) + (of_nat (i mod 2))/2^(nat (Suc m))
+                    = (∑l∈{1..(Suc m)}. (bin_rep (Suc m) (of_nat i))!(l-1)/2^l)"
       proof-
-        have "(i mod 2) = (bin_rep (Suc n) i)!((Suc n)-1)" 
+        have "(i mod 2) = (bin_rep (Suc m) i)!((Suc m)-1)" 
           using a0 f0
           by (metis bin_rep_coeff bin_rep_even bin_rep_odd diff_less dvd_imp_mod_0 le_SucI le_imp_less_Suc less_one odd_iff_mod_2_eq_one zero_le) 
-        then have "(∑l∈{1..n}. (bin_rep n (i div 2))!(l-1)/2^l) + (of_nat (i mod 2))/2^(nat (Suc n))
-           = (∑l∈{1..n}. (bin_rep n (i div 2))!(l-1)/2^l) + ((bin_rep (Suc n) i)!((Suc n)-1))/2^(nat (Suc n))" by auto
-        moreover have "(∑l∈{1..n}. (bin_rep n (i div 2))!(l-1)/2^l) = (∑l∈{1..n}. (bin_rep (Suc n) i)!(l-1)/2^l)" 
+        then have "(∑l∈{1..m}. (bin_rep m (i div 2))!(l-1)/2^l) + (of_nat (i mod 2))/2^(nat (Suc m))
+           = (∑l∈{1..m}. (bin_rep m (i div 2))!(l-1)/2^l) + ((bin_rep (Suc m) i)!((Suc m)-1))/2^(nat (Suc m))" by auto
+        moreover have "(∑l∈{1..m}. (bin_rep m (i div 2))!(l-1)/2^l) = (∑l∈{1..m}. (bin_rep (Suc m) i)!(l-1)/2^l)" 
             using bin_rep_div a1 a0 assms atLeastAtMost_iff f0 by simp
-        ultimately have "(∑l∈{1..n}. (bin_rep n (i div 2))!(l-1)/2^l) + (of_nat (i mod 2))/2^(nat (Suc n))
-           =  (∑l∈{1..n}. (bin_rep (Suc n) i)!(l-1)/2^l) + ((bin_rep (Suc n) i)!((Suc n)-1))/2^(nat (Suc n))"
+        ultimately have "(∑l∈{1..m}. (bin_rep m (i div 2))!(l-1)/2^l) + (of_nat (i mod 2))/2^(nat (Suc m))
+           =  (∑l∈{1..m}. (bin_rep (Suc m) i)!(l-1)/2^l) + ((bin_rep (Suc m) i)!((Suc m)-1))/2^(nat (Suc m))"
           by simp
-        then have "(∑l∈{1..n}. (bin_rep n (i div 2))!(l-1)/2^l) + (of_nat (i mod 2))/2^(nat (Suc n))
-           =  (∑l∈{1..n}. (bin_rep (Suc n) i)!(l-1)/2^l) + ((bin_rep (Suc n) i)!((Suc n)-1))/2^(Suc n)" 
+        then have "(∑l∈{1..m}. (bin_rep m (i div 2))!(l-1)/2^l) + (of_nat (i mod 2))/2^(nat (Suc m))
+           =  (∑l∈{1..m}. (bin_rep (Suc m) i)!(l-1)/2^l) + ((bin_rep (Suc m) i)!((Suc m)-1))/2^(Suc m)" 
           by (metis nat_int)
-        moreover have "(∑l∈{1..n}. (bin_rep (Suc n) i)!(l-1)/2^l) + ((bin_rep (Suc n) i)!((Suc n)-1))/2^(Suc n)
-           = (∑l∈{1..(Suc n)}. (bin_rep (Suc n) i)!(l-1)/2^l)" by simp
+        moreover have "(∑l∈{1..m}. (bin_rep (Suc m) i)!(l-1)/2^l) + ((bin_rep (Suc m) i)!((Suc m)-1))/2^(Suc m)
+           = (∑l∈{1..(Suc m)}. (bin_rep (Suc m) i)!(l-1)/2^l)" by simp
         ultimately show ?thesis by simp
       qed
-      ultimately have "(Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)
-      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2)))) $$ (i,j)
-        = (exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc n)}. (bin_rep (Suc n) (of_nat i))!(l-1)/2^l)))*1/sqrt(2)^(Suc n)"
+      ultimately have "(Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)
+      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2)))) $$ (i,j)
+        = (exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc m)}. (bin_rep (Suc m) (of_nat i))!(l-1)/2^l)))*1/sqrt(2)^(Suc m)"
         by presburger
-      moreover have "(Matrix.mat (2^(Suc n)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc n)}. (bin_rep (Suc n) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc n))) $$ (i,j)
-      = exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc n)}. (bin_rep (Suc n) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc n)" using f0 by auto
-      ultimately show "(Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)
-      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2)))) $$ (i,j)
-        = (Matrix.mat (2^(Suc n)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc n)}. (bin_rep (Suc n) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc n))) $$ (i,j) "
+      moreover have "(Matrix.mat (2^(Suc m)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc m)}. (bin_rep (Suc m) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc m))) $$ (i,j)
+      = exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc m)}. (bin_rep (Suc m) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc m)" using f0 by auto
+      ultimately show "(Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)
+      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2)))) $$ (i,j)
+        = (Matrix.mat (2^(Suc m)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc m)}. (bin_rep (Suc m) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc m))) $$ (i,j) "
         by simp
     next
-      show "dim_row (Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)
-      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2))))
-        = dim_row (Matrix.mat (2^(Suc n)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc n)}. (bin_rep (Suc n) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc n)))"
+      show "dim_row (Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)
+      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2))))
+        = dim_row (Matrix.mat (2^(Suc m)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc m)}. (bin_rep (Suc m) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc m)))"
         by simp
     next
-      show "dim_col (Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)
-      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc n)))*1/sqrt(2))))
-        = dim_col (Matrix.mat (2^(Suc n)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc n)}. (bin_rep (Suc n) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc n)))"
+      show "dim_col (Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)
+      ⨂ (Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat (Suc m)))*1/sqrt(2))))
+        = dim_col (Matrix.mat (2^(Suc m)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc m)}. (bin_rep (Suc m) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc m)))"
         by simp
     qed
-    ultimately show "(pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..(Suc n)] ] (Suc n))
-       =  Matrix.mat (2^(Suc n)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc n)}. (bin_rep (Suc n) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc n))"
+    ultimately show "(pr [Matrix.mat 2 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..(Suc m)] ] (Suc m))
+       =  Matrix.mat (2^(Suc m)) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..(Suc m)}. (bin_rep (Suc m) (of_nat i))!(l-1)/2^l))*1/sqrt(2)^(Suc m))"
       by simp
   qed
 qed
 
 abbreviation ψ⇩3 :: "nat ⇒ nat ⇒ complex Matrix.mat" where 
-  "ψ⇩3 m jd ≡ Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*i/2^m)*1/sqrt(2)^m)"
+  "ψ⇩3 n jd ≡ Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*i/2^n)*1/sqrt(2)^n)"
 
 lemma product_rep_equals_matrix_rep: 
-  assumes "jd < 2^m" and "m ≥ 1"
-  shows "(ψ⇩2 m jd) = (ψ⇩3 m jd)"
+  assumes "jd < 2^n" and "n ≥ 1"
+  shows "(ψ⇩2 n jd) = (ψ⇩3 n jd)"
 proof-
-  have  "k ∈ {1..m} ⟶ psq (m+1-nat k) m m jd = Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(nat k))*1/sqrt(2))" for k::int
-    using qr_different_rep[of m "m+1-nat k" jd] assms by auto
-  then have "[psq (m+1-nat k) m m jd. k<-[1..m]] = [Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(nat k))*1/sqrt(2)). k<-[1..m]]" 
+  have  "k ∈ {1..n} ⟶ psq (n+1-nat k) n n jd = Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(nat k))*1/sqrt(2))" for k::int
+    using qr_different_rep[of n "n+1-nat k" jd] assms by auto
+  then have "[psq (n+1-nat k) n n jd. k<-[1..n]] = [Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*i/2^(nat k))*1/sqrt(2)). k<-[1..n]]" 
     by simp
-  then have "(ψ⇩2 m jd) = pr [Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..m]] m" 
+  then have "(ψ⇩2 n jd) = pr [Matrix.mat 2 1 (λ(i,j). exp(2*pi*𝗂*jd*(of_nat i)/2^(nat k))*1/sqrt(2)). k<-[1..n]] n" 
     by presburger   
-  then have "(ψ⇩2 m jd) = Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)"
+  then have "(ψ⇩2 n jd) = Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)"
     using product_rep_to_matrix_rep assms by simp
-  moreover have "Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m)
-               = (ψ⇩3 m jd)"
+  moreover have "Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n)
+               = (ψ⇩3 n jd)"
   proof
     fix i j::nat
-    assume a0: "i < dim_row (ψ⇩3 m jd)" and a1: "j < dim_col (ψ⇩3 m jd)"
-    then have "Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m) $$ (i,j)
-    = exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m" by simp
-    then have "Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m) $$ (i,j)
-    = exp(complex_of_real(2*pi)*𝗂*jd*((∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l)*2^m/2^m))*1/sqrt(2)^m" by simp
-    then have "Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m) $$ (i,j)
-    = exp(complex_of_real(2*pi)*𝗂*jd*((∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l*2^m)*1/2^m))*1/sqrt(2)^m" 
+    assume a0: "i < dim_row (ψ⇩3 n jd)" and a1: "j < dim_col (ψ⇩3 n jd)"
+    then have "Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n) $$ (i,j)
+    = exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n" by simp
+    then have "Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n) $$ (i,j)
+    = exp(complex_of_real(2*pi)*𝗂*jd*((∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l)*2^n/2^n))*1/sqrt(2)^n" by simp
+    then have "Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n) $$ (i,j)
+    = exp(complex_of_real(2*pi)*𝗂*jd*((∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l*2^n)*1/2^n))*1/sqrt(2)^n" 
       by (smt sum.cong sum_distrib_right)
-    then have "Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m) $$ (i,j)
-    = exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)*(1/2^l*2^m))*1/2^m)*1/sqrt(2)^m" 
+    then have "Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n) $$ (i,j)
+    = exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)*(1/2^l*2^n))*1/2^n)*1/sqrt(2)^n" 
       using mult.commute by simp
-    moreover have "(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)*(1/2^l*2^m)) = (∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)*2^(m-l))"
+    moreover have "(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)*(1/2^l*2^n)) = (∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)*2^(n-l))"
     proof-
-      have "l∈{1..m} ⟶ (1/2^l*2^m) = (2::real)^(m-l)" for l::nat by (simp add: power_diff)
+      have "l∈{1..n} ⟶ (1/2^l*2^n) = (2::real)^(n-l)" for l::nat by (simp add: power_diff)
       then show ?thesis by simp
     qed
-    ultimately have "Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m) $$ (i,j)
-    = exp(complex_of_real(2*pi)*𝗂*jd*real (∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)*2^(m-l))*1/2^m)*1/sqrt(2)^m" 
+    ultimately have "Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n) $$ (i,j)
+    = exp(complex_of_real(2*pi)*𝗂*jd*real (∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)*2^(n-l))*1/2^n)*1/sqrt(2)^n" 
       by metis
-    then have "Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m) $$ (i,j)
-    = exp(complex_of_real(2*pi)*𝗂*jd*real i*1/2^m)*1/sqrt(2)^m" 
-      using bit_representation[of i m] assms nat_mult_1_right 
+    then have "Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n) $$ (i,j)
+    = exp(complex_of_real(2*pi)*𝗂*jd*real i*1/2^n)*1/sqrt(2)^n" 
+      using bit_representation[of i n] assms nat_mult_1_right 
       by (metis (mono_tags, lifting) a0 dim_row_mat(1) of_nat_id sum.cong)
-    then show "Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m) $$ (i,j)
-            = (ψ⇩3 m jd) $$ (i,j)" using a0 a1 by simp
+    then show "Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n) $$ (i,j)
+            = (ψ⇩3 n jd) $$ (i,j)" using a0 a1 by simp
   next
-    show "dim_row (Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m))
-        = dim_row (ψ⇩3 m jd)" by simp
+    show "dim_row (Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n))
+        = dim_row (ψ⇩3 n jd)" by simp
   next
-    show "dim_col (Matrix.mat (2^m) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..m}. (bin_rep m (of_nat i))!(l-1)/2^l))*1/sqrt(2)^m))
-        = dim_col (ψ⇩3 m jd)" by simp
+    show "dim_col (Matrix.mat (2^n) 1 (λ(i,j). exp(complex_of_real(2*pi)*𝗂*jd*(∑l∈{1..n}. (bin_rep n (of_nat i))!(l-1)/2^l))*1/sqrt(2)^n))
+        = dim_col (ψ⇩3 n jd)" by simp
   qed
   ultimately show ?thesis by simp
 qed
 
 theorem quantum_fourier_transform_matrix_rep:
-  assumes "j < 2^m" and "m ≥ 1"
-  shows "(QFT m) * |unit_vec (2^m) j⟩ = ψ⇩3 m j" 
+  assumes "j < 2^n" and "n ≥ 1"
+  shows "(QFT n) * |unit_vec (2^n) j⟩ = ψ⇩3 n j" 
   using quantum_fourier_transform_prod_rep assms product_rep_equals_matrix_rep by simp
 
 theorem quantum_fourier_transform_is_state:
-  assumes "j < 2^m" and "m ≥ 1"
-  shows "state m (ψ⇩3 m j)"
+  assumes "j < 2^n" and "n ≥ 1"
+  shows "state n (ψ⇩3 n j)"
 proof-
-  have "(QFT m) * |unit_vec (2^m) j⟩ = ψ⇩3 m j" using quantum_fourier_transform_matrix_rep assms by simp
-  moreover have "gate m (QFT m)" using assms quantum_fourier_transform_is_gate by simp
-  moreover have "state m |unit_vec (2^m) j⟩" 
+  have "(QFT n) * |unit_vec (2^n) j⟩ = ψ⇩3 n j" using quantum_fourier_transform_matrix_rep assms by simp
+  moreover have "gate n (QFT n)" using assms quantum_fourier_transform_is_gate by simp
+  moreover have "state n |unit_vec (2^n) j⟩" 
     using assms(1) 
     by (metis (no_types, lifting) dim_col_mat(1) dim_row_mat(1) index_unit_vec(3) ket_vec_col ket_vec_def state_def unit_cpx_vec_length)
   ultimately show ?thesis
